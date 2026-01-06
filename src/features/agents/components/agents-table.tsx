@@ -128,7 +128,7 @@ export function AgentsTable({ data, search, navigate, isLoading }: DataTableProp
       />
 
       <div className='@container/content flex-1 overflow-auto'>
-        <Table className='relative w-full min-w-max table-fixed'>
+        <Table className='relative w-full min-w-max'>
           <TableHeader className='sticky top-0 z-10 bg-card shadow-[0_1px_0_hsl(var(--border))]'>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className='hover:bg-transparent'>

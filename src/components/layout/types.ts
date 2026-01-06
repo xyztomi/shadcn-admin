@@ -12,10 +12,14 @@ type Team = {
   plan: string
 }
 
+// Roles that can access a nav item (empty = all roles)
+type UserRole = 'superuser' | 'admin' | 'manager' | 'agent'
+
 type BaseNavItem = {
   title: string
   badge?: string
   icon?: React.ElementType
+  roles?: UserRole[] // If undefined, accessible to all roles
 }
 
 type NavLink = BaseNavItem & {
@@ -33,6 +37,7 @@ type NavItem = NavCollapsible | NavLink
 type NavGroup = {
   title: string
   items: NavItem[]
+  roles?: UserRole[] // If undefined, accessible to all roles
 }
 
 type SidebarData = {
@@ -41,4 +46,11 @@ type SidebarData = {
   navGroups: NavGroup[]
 }
 
-export type { SidebarData, NavGroup, NavItem, NavCollapsible, NavLink }
+export type {
+  SidebarData,
+  NavGroup,
+  NavItem,
+  NavCollapsible,
+  NavLink,
+  UserRole,
+}

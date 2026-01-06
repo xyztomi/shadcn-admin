@@ -68,42 +68,27 @@ export const sidebarData: SidebarData = {
           icon: MessagesSquare,
         },
         {
-          title: 'Agents',
-          url: '/users',
-          icon: Headphones,
-        },
-        {
           title: 'Tasks',
           url: '/tasks',
           icon: ListTodo,
         },
-        // {
-        //   title: 'Apps',
-        //   url: '/apps',
-        //   icon: Package,
-        // },
-        // {
-        //   title: 'Secured by Clerk',
-        //   icon: ClerkLogo,
-        //   items: [
-        //     {
-        //       title: 'Sign In',
-        //       url: '/clerk/sign-in',
-        //     },
-        //     {
-        //       title: 'Sign Up',
-        //       url: '/clerk/sign-up',
-        //     },
-        //     {
-        //       title: 'User Management',
-        //       url: '/clerk/user-management',
-        //     },
-        //   ],
-        // },
+      ],
+    },
+    {
+      title: 'Management',
+      roles: ['superuser', 'admin', 'manager'], // Only admin+ can see this group
+      items: [
+        {
+          title: 'Agents',
+          url: '/agents',
+          icon: Headphones,
+          roles: ['superuser', 'admin', 'manager'],
+        },
       ],
     },
     {
       title: 'Pages',
+      roles: ['superuser', 'admin'], // Only admin can see dev pages
       items: [
         {
           title: 'Auth',

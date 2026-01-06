@@ -1,24 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { type Contact, ServiceTag } from '@/types'
 import { api } from './client'
 
-// Types matching backend
-export interface Contact {
-  wa_id: string
-  name: string | null
-  phone_number: string
-  service_tag: 'viufinder' | 'viufinder_xp' | null
-  assigned_agent_id: number | null
-  assigned_agent_name: string | null
-  is_active: boolean
-  notes: string | null
-  last_message_at: string | null
-  unread_count: number
-  created_at: string
-  updated_at: string
-}
+// Re-export for convenience
+export type { Contact }
+export { ServiceTag }
 
 export interface ContactFilters {
-  service_tag?: 'viufinder' | 'viufinder_xp'
+  service_tag?: ServiceTag
   assigned_agent_id?: number
   is_active?: boolean
   unassigned?: boolean
@@ -129,7 +118,7 @@ export function useTagContact() {
       serviceTag,
     }: {
       waId: string
-      serviceTag: 'viufinder' | 'viufinder_xp'
+      serviceTag: ServiceTag
     }) => {
       const response = await api.post(`/contacts/${waId}/tag`, {
         service_tag: serviceTag,

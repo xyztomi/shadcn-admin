@@ -3,30 +3,19 @@ import {
   useMutation,
   useQueryClient,
   useInfiniteQuery,
+  type InfiniteData,
 } from '@tanstack/react-query'
+import {
+  type Message,
+  MessageDirection,
+  MessageType,
+  MessageStatus,
+} from '@/types'
 import { api } from './client'
 
-export interface Message {
-  id: number
-  wa_id: string
-  wa_message_id: string
-  direction: 'inbound' | 'outbound'
-  message_type:
-    | 'text'
-    | 'image'
-    | 'video'
-    | 'audio'
-    | 'document'
-    | 'sticker'
-    | 'location'
-    | 'contacts'
-    | 'interactive'
-  content: string
-  media_url: string | null
-  status: 'pending' | 'sent' | 'delivered' | 'read' | 'failed'
-  timestamp: string
-  created_at: string
-}
+// Re-export for convenience
+export type { Message }
+export { MessageDirection, MessageType, MessageStatus }
 
 export interface ConversationResponse {
   messages: Message[]
@@ -35,7 +24,13 @@ export interface ConversationResponse {
 
 // Get conversation history with cursor-based pagination
 export function useConversation(waId: string, limit = 50) {
-  return useInfiniteQuery({
+  return useInfiniteQuery<
+    ConversationResponse,
+    Error,
+    InfiniteData<ConversationResponse>,
+    (string | number)[],
+    string | undefined
+  >({
     queryKey: ['conversation', waId, limit],
     queryFn: async ({ pageParam }): Promise<ConversationResponse> => {
       const params = new URLSearchParams({ limit: String(limit) })
@@ -45,13 +40,13 @@ export function useConversation(waId: string, limit = 50) {
       const response = await api.get(`/chat/${waId}?${params.toString()}`)
       return response.data
     },
-    initialPageParam: undefined as number | undefined,
+    initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => {
       if (!lastPage.has_more || lastPage.messages.length === 0) {
         return undefined
       }
       // Return the ID of the oldest message to load older messages
-      return lastPage.messages[lastPage.messages.length - 1].id
+      return String(lastPage.messages[lastPage.messages.length - 1].id)
     },
     enabled: !!waId,
     // Poll every 5 seconds as fallback when WebSocket isn't working

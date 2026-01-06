@@ -20,6 +20,9 @@ export * from './agents'
 // Chat exports
 export * from './chat'
 
+// Analytics exports
+export * from './analytics'
+
 // Shifts exports
 export * from './shifts'
 

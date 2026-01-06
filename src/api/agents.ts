@@ -1,24 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { type Agent, type Contact, AgentRole, AgentDepartment } from '@/types'
 import { api } from './client'
 
-export interface Agent {
-  id: number
-  username: string
-  email: string | null
-  full_name: string
-  role: 'admin' | 'manager' | 'agent'
-  department: 'viufinder' | 'viufinder_xp'
-  is_online: boolean
-  is_available: boolean
-  is_active: boolean
-  active_chats: number
-  max_chats: number
-  created_at: string
-  updated_at: string
-}
+// Re-export for convenience
+export type { Agent }
+export { AgentRole, AgentDepartment }
 
 export interface AgentFilters {
-  department?: 'viufinder' | 'viufinder_xp'
+  department?: AgentDepartment
   is_available?: boolean
   is_online?: boolean
 }
@@ -28,8 +17,8 @@ export interface CreateAgentPayload {
   password: string
   full_name: string
   email?: string
-  role: 'admin' | 'manager' | 'agent'
-  department: 'viufinder' | 'viufinder_xp'
+  role: AgentRole
+  department: AgentDepartment
   max_chats?: number
 }
 
@@ -37,8 +26,8 @@ export interface UpdateAgentPayload {
   full_name?: string
   email?: string
   password?: string
-  role?: 'admin' | 'manager' | 'agent'
-  department?: 'viufinder' | 'viufinder_xp'
+  role?: AgentRole
+  department?: AgentDepartment
   max_chats?: number
 }
 
@@ -140,5 +129,17 @@ export function useDeleteAgent() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agents'] })
     },
+  })
+}
+
+// Get agent's assigned contacts
+export function useAgentContacts(agentId: number) {
+  return useQuery({
+    queryKey: ['agents', agentId, 'contacts'],
+    queryFn: async (): Promise<Contact[]> => {
+      const response = await api.get(`/agents/${agentId}/contacts`)
+      return response.data
+    },
+    enabled: !!agentId,
   })
 }

@@ -1,20 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import type { Agent, AgentRole, AgentDepartment } from '@/types'
 import { api } from './client'
 
-// Types matching backend
-export interface Agent {
-  id: number
-  username: string
-  email: string
-  full_name: string
-  role: 'superuser' | 'admin' | 'agent'
-  department: 'viufinder' | 'viufinder_xp'
-  is_online: boolean
-  is_available: boolean
-  is_active: boolean
-  active_chats: number
-  max_chats: number
-}
+// Re-export Agent type for convenience
+export type { Agent }
 
 export interface LoginCredentials {
   username: string
@@ -26,6 +15,16 @@ export interface LoginResponse {
   token_type: string
 }
 
+export interface RegisterPayload {
+  username: string
+  password: string
+  full_name: string
+  email?: string
+  role: AgentRole
+  department: AgentDepartment
+  max_chats?: number
+}
+
 // Login mutation
 export function useLogin() {
   return useMutation({
@@ -34,6 +33,20 @@ export function useLogin() {
     ): Promise<LoginResponse> => {
       const response = await api.post('/auth/login', credentials)
       return response.data
+    },
+  })
+}
+
+// Register new agent (admin only)
+export function useRegister() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: RegisterPayload): Promise<Agent> => {
+      const response = await api.post('/auth/register', data)
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agents'] })
     },
   })
 }

@@ -28,7 +28,21 @@ export interface Message {
   wa_id: string
   direction: MessageDirection
   message_type: MessageType
-  text: string | null
+  /**
+   * Some endpoints return `content`, others `text`. Keep both to ensure compatibility.
+   */
+  content?: string | null
+  text?: string | null
+  message?: string | null
+  /** Sender metadata provided by the backend for agent/customer attribution. */
+  sender?: string | null
+  agent_id?: number | null
+  sender_name?: string | null
+  sender_username?: string | null
+  agent_name?: string | null
+  agent_username?: string | null
+  contact_name?: string | null
+  contact_username?: string | null
   status: MessageStatus
   timestamp: string
   created_at: string

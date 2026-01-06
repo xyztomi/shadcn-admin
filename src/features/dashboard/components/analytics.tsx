@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import {
   MessageSquare,
   Users,
@@ -12,26 +13,50 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Badge } from '@/components/ui/badge'
 import {
   useAnalyticsOverview,
   useContactsByService,
   useAgentPerformance,
   useMessagesByType,
+  useDepartmentsSummary,
 } from '@/api/analytics'
+import { cn } from '@/lib/utils'
 import { AnalyticsChart } from './analytics-chart'
+import { format, parseISO } from 'date-fns'
+
+const safeFormatDate = (dateString: string | null | undefined, pattern: string): string | null => {
+  if (!dateString) return null
+  try {
+    return format(parseISO(dateString), pattern)
+  } catch {
+    return null
+  }
+}
 
 export function Analytics() {
   const { data: overview, isLoading: overviewLoading } = useAnalyticsOverview()
   const { data: contactsByService, isLoading: contactsLoading } = useContactsByService()
   const { data: agentPerformance, isLoading: agentsLoading } = useAgentPerformance()
   const { data: messagesByType, isLoading: messagesLoading } = useMessagesByType()
+  const { data: departmentsSummary, isLoading: departmentsLoading } = useDepartmentsSummary()
+
+  const periodLabel = useMemo(() => {
+    if (!overview?.period) return null
+    const start = safeFormatDate(overview.period.start_date, 'MMM d')
+    const end = safeFormatDate(overview.period.end_date, 'MMM d')
+    if (!start || !end) return null
+    return `${start} – ${end}`
+  }, [overview])
 
   return (
     <div className='space-y-4'>
       <Card>
         <CardHeader>
           <CardTitle>Message Activity</CardTitle>
-          <CardDescription>Daily message trends over time</CardDescription>
+          <CardDescription>
+            {periodLabel ? `Queue pulse · ${periodLabel}` : 'Daily message trends over time'}
+          </CardDescription>
         </CardHeader>
         <CardContent className='px-6'>
           <AnalyticsChart />
@@ -111,26 +136,65 @@ export function Analytics() {
           </CardContent>
         </Card>
       </div>
-      <div className='grid grid-cols-1 gap-4 lg:grid-cols-7'>
-        <Card className='col-span-1 lg:col-span-4'>
+      <div className='grid grid-cols-1 gap-4 xl:grid-cols-7'>
+        <Card className='col-span-1 xl:col-span-4'>
           <CardHeader>
-            <CardTitle>Referrers</CardTitle>
-            <CardDescription>Top sources driving traffic</CardDescription>
+            <CardTitle>Department Load</CardTitle>
+            <CardDescription>Contacts per online agent by service tag</CardDescription>
           </CardHeader>
           <CardContent>
-            <SimpleBarList
-              items={[
-                { name: 'Direct', value: 512 },
-                { name: 'Product Hunt', value: 238 },
-                { name: 'Twitter', value: 174 },
-                { name: 'Blog', value: 104 },
-              ]}
-              barClass='bg-primary'
-              valueFormatter={(n) => `${n}`}
-            />
+            {departmentsLoading ? (
+              <div className='space-y-3'>
+                {[1, 2].map((i) => (
+                  <Skeleton key={i} className='h-24 w-full' />
+                ))}
+              </div>
+            ) : (
+              <div className='grid gap-4 sm:grid-cols-2'>
+                {(['viufinder', 'viufinder_xp'] as const).map((key) => {
+                  const summary = departmentsSummary?.[key]
+                  const label = key === 'viufinder' ? 'Viufinder' : 'Viufinder XP'
+                  const contacts = summary?.contacts.total ?? 0
+                  const unassigned = summary?.contacts.unassigned ?? 0
+                  const onlineAgents = summary?.agents.online ?? 0
+                  const totalAgents = summary?.agents.total ?? 0
+                  const loadPerAgent = onlineAgents > 0 ? contacts / onlineAgents : contacts
+                  const loadPercent = Math.min((loadPerAgent / 6) * 100, 100)
+                  const badgeStyle = loadPerAgent > 6 ? 'bg-destructive/10 text-destructive' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                  return (
+                    <div key={key} className='rounded-xl border bg-card/50 p-4'>
+                      <div className='flex items-center justify-between gap-2'>
+                        <div>
+                          <p className='text-sm font-semibold'>{label}</p>
+                          <p className='text-xs text-muted-foreground'>{unassigned.toLocaleString()} waiting assignment</p>
+                        </div>
+                        <span className={cn('rounded-full px-2 py-0.5 text-xs font-semibold', badgeStyle)}>
+                          {loadPerAgent.toFixed(1)} chats/agent
+                        </span>
+                      </div>
+                      <div className='mt-3 h-2 w-full rounded-full bg-muted'>
+                        <div className='h-full rounded-full bg-primary' style={{ width: `${loadPercent}%` }} />
+                      </div>
+                      <dl className='mt-3 grid grid-cols-2 gap-3 text-xs text-muted-foreground'>
+                        <div>
+                          <p>Contacts</p>
+                          <p className='text-base font-semibold text-foreground'>{contacts.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p>Agents Online</p>
+                          <p className='text-base font-semibold text-foreground'>
+                            {onlineAgents}/{totalAgents}
+                          </p>
+                        </div>
+                      </dl>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
-        <Card className='col-span-1 lg:col-span-3'>
+        <Card className='col-span-1 xl:col-span-3'>
           <CardHeader>
             <CardTitle>Message Types</CardTitle>
             <CardDescription>Distribution of message types</CardDescription>
@@ -151,12 +215,13 @@ export function Analytics() {
                   })) ?? []
                 }
                 barClass='bg-primary'
-                valueFormatter={(n) => `${n}`}
+                valueFormatter={(n) => n.toLocaleString()}
+                emptyMessage='No message traffic recorded yet.'
               />
             )}
           </CardContent>
         </Card>
-        <Card className='col-span-1 lg:col-span-3'>
+        <Card className='col-span-1 xl:col-span-3'>
           <CardHeader>
             <CardTitle>Contacts by Service</CardTitle>
             <CardDescription>Distribution by department</CardDescription>
@@ -177,7 +242,8 @@ export function Analytics() {
                   })) ?? []
                 }
                 barClass='bg-muted-foreground'
-                valueFormatter={(n) => `${n}`}
+                valueFormatter={(n) => n.toLocaleString()}
+                emptyMessage='No contacts synced for this period.'
               />
             )}
           </CardContent>
@@ -212,24 +278,30 @@ export function Analytics() {
                       <div className='min-w-0 flex-1'>
                         <p className='truncate text-sm font-medium'>{agent.full_name}</p>
                         <p className='text-xs text-muted-foreground'>
-                          {agent.department === 'viufinder_xp' ? 'VF XP' : 'VIUFinder'}
+                          {agent.department === 'viufinder_xp' ? 'Viufinder XP' : 'Viufinder'} ·{' '}
+                          {agent.is_available ? 'Available' : 'Busy'}
                         </p>
                       </div>
+                      {agent.avg_rating ? (
+                        <Badge variant='outline' className='text-[0.65rem]'>
+                          {agent.avg_rating.toFixed(1)} ★
+                        </Badge>
+                      ) : null}
                     </div>
-                    <div className='flex gap-4 text-sm'>
-                      <div className='text-center'>
+                    <div className='grid grid-cols-4 gap-2 text-center text-sm'>
+                      <div>
                         <div className='font-medium'>{agent.active_chats}</div>
                         <div className='text-xs text-muted-foreground'>Active</div>
                       </div>
-                      <div className='text-center'>
+                      <div>
                         <div className='font-medium'>{agent.total_resolved}</div>
                         <div className='text-xs text-muted-foreground'>Resolved</div>
                       </div>
-                      <div className='text-center'>
+                      <div>
                         <div className='font-medium'>{agent.total_messages_sent}</div>
                         <div className='text-xs text-muted-foreground'>Messages</div>
                       </div>
-                      <div className='text-center'>
+                      <div>
                         <div className='font-medium'>
                           {Math.round(agent.avg_response_time / 60)}m
                         </div>
@@ -250,11 +322,17 @@ function SimpleBarList({
   items,
   valueFormatter,
   barClass,
+  emptyMessage,
 }: {
   items: { name: string; value: number }[]
   valueFormatter: (n: number) => string
   barClass: string
+  emptyMessage?: string
 }) {
+  if (items.length === 0) {
+    return <p className='text-sm text-muted-foreground'>{emptyMessage ?? 'No data available.'}</p>
+  }
+
   const max = Math.max(...items.map((i) => i.value), 1)
   return (
     <ul className='space-y-3'>

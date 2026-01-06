@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { Fragment } from 'react/jsx-runtime'
 import { format } from 'date-fns'
 import {
@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useContacts, type Contact } from '@/api/contacts'
+import { useAgents, type Agent } from '@/api/agents'
 import { useConversation, useSendMessage, useMarkAsRead, type Message } from '@/api/chat'
 import { useWebSocket } from '@/hooks/use-websocket'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -27,6 +28,41 @@ import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
+import { useAuthStore, type AuthUser } from '@/stores/auth-store'
+
+const getMessageContent = (msg: Message): string => {
+  if (typeof msg.content === 'string' && msg.content.length > 0) return msg.content
+  if (typeof msg.text === 'string' && msg.text.length > 0) return msg.text
+  if (typeof msg.message === 'string' && msg.message.length > 0) return msg.message
+  return ''
+}
+
+const getMessageSenderName = (
+  msg: Message,
+  currentUser: AuthUser | null,
+  contact: Contact | null,
+  agentsById?: Map<number, Agent>
+): string => {
+  const agentFromMessage = msg.agent_id ? agentsById?.get(msg.agent_id) : undefined
+  const senderCandidates: Array<string | null | undefined> = [
+    msg.sender,
+    msg.sender_name,
+    msg.sender_username,
+    agentFromMessage?.full_name,
+    agentFromMessage?.username,
+    msg.direction === 'outbound' ? msg.agent_name : msg.contact_name,
+    msg.direction === 'outbound' ? msg.agent_username : msg.contact_username,
+  ]
+
+  const resolved = senderCandidates.find((name) => typeof name === 'string' && name.trim().length > 0)
+  if (resolved) return resolved
+
+  if (msg.direction === 'outbound') {
+    return currentUser?.full_name || currentUser?.username || 'You'
+  }
+
+  return contact?.name || contact?.phone_number || msg.wa_id
+}
 
 function MessageStatus({ status }: { status: Message['status'] }) {
   switch (status) {
@@ -70,9 +106,19 @@ export function Chats() {
   const [mobileSelectedContact, setMobileSelectedContact] = useState<Contact | null>(null)
   const [messageText, setMessageText] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const currentUser = useAuthStore((state) => state.auth.user)
 
   // Fetch contacts for the chat list
   const { data: contacts, isLoading: contactsLoading } = useContacts()
+  const { data: agents } = useAgents()
+
+  const agentsById = useMemo(() => {
+    const map = new Map<number, Agent>()
+    agents?.forEach((agent) => {
+      map.set(agent.id, agent)
+    })
+    return map
+  }, [agents])
 
   // Fetch conversation for selected contact
   const {
@@ -329,32 +375,44 @@ export function Chats() {
                               <div className='text-center text-xs text-muted-foreground py-2'>
                                 {dateKey}
                               </div>
-                              {messagesByDate[dateKey].map((msg) => (
-                                <div
-                                  key={msg.id}
-                                  className={cn(
-                                    'max-w-72 px-3 py-2 shadow-lg',
-                                    msg.direction === 'outbound'
-                                      ? 'self-end rounded-[16px_16px_0_16px] bg-primary/90 text-primary-foreground/75'
-                                      : 'self-start rounded-[16px_16px_16px_0] bg-muted'
-                                  )}
-                                >
-                                  {msg.content}
-                                  <span
+                              {messagesByDate[dateKey].map((msg) => {
+                                const senderName = getMessageSenderName(
+                                  msg,
+                                  currentUser,
+                                  selectedContact,
+                                  agentsById
+                                )
+                                const timestamp = safeFormat(msg.timestamp || msg.created_at, 'h:mm a')
+
+                                return (
+                                  <div
+                                    key={msg.id}
                                     className={cn(
-                                      'mt-1 flex items-center gap-1 text-xs font-light italic',
+                                      'max-w-72 px-3 py-2 shadow-lg',
                                       msg.direction === 'outbound'
-                                        ? 'justify-end text-primary-foreground/85'
-                                        : 'text-foreground/75'
+                                        ? 'self-end rounded-[16px_16px_0_16px] bg-primary/90 text-primary-foreground/75'
+                                        : 'self-start rounded-[16px_16px_16px_0] bg-muted'
                                     )}
                                   >
-                                    {safeFormat(msg.timestamp || msg.created_at, 'h:mm a')}
-                                    {msg.direction === 'outbound' && (
-                                      <MessageStatus status={msg.status} />
-                                    )}
-                                  </span>
-                                </div>
-                              ))}
+                                    {getMessageContent(msg)}
+                                    <span
+                                      className={cn(
+                                        'mt-1 flex flex-wrap items-center gap-1 text-[0.7rem] font-light italic',
+                                        msg.direction === 'outbound'
+                                          ? 'justify-end text-primary-foreground/85'
+                                          : 'text-foreground/75'
+                                      )}
+                                    >
+                                      <span className='font-semibold not-italic'>{senderName}</span>
+                                      {timestamp && <span aria-hidden='true'>·</span>}
+                                      {timestamp}
+                                      {msg.direction === 'outbound' && (
+                                        <MessageStatus status={msg.status} />
+                                      )}
+                                    </span>
+                                  </div>
+                                )
+                              })}
                             </Fragment>
                           ))}
 

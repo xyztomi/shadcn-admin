@@ -2,9 +2,6 @@ import { AxiosError } from 'axios'
 import { toast } from 'sonner'
 
 export function handleServerError(error: unknown) {
-  // eslint-disable-next-line no-console
-  console.log(error)
-
   let errMsg = 'Something went wrong!'
 
   if (
@@ -17,7 +14,16 @@ export function handleServerError(error: unknown) {
   }
 
   if (error instanceof AxiosError) {
-    errMsg = error.response?.data.title
+    // Backend returns { detail: "message" } for errors
+    const detail = error.response?.data?.detail
+    if (typeof detail === 'string') {
+      errMsg = detail
+    } else if (Array.isArray(detail)) {
+      // Validation errors return array of { loc, msg, type }
+      errMsg = detail.map((e) => e.msg).join(', ')
+    } else if (error.response?.data?.title) {
+      errMsg = error.response.data.title
+    }
   }
 
   toast.error(errMsg)

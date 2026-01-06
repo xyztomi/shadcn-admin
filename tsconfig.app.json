@@ -21,6 +21,9 @@
       "@/*": ["./src/*"]
     },
 
+    /* Silence deprecation for baseUrl until migration */
+    "ignoreDeprecations": "5.0",
+
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,

@@ -213,11 +213,11 @@ These components have RTL/custom modifications - **merge carefully** if updating
 ## Commands
 
 ```bash
-pnpm dev        # Start dev server
-pnpm build      # Type-check + production build
-pnpm lint       # ESLint check
-pnpm format     # Prettier format
-pnpm knip       # Find unused exports/dependencies
+npm run dev        # Start dev server (port 5173)
+npm run build      # Type-check + production build
+npm run lint       # ESLint check
+npm run format     # Prettier format
+npm run knip       # Find unused exports/dependencies
 ```
 
 ## Key Conventions

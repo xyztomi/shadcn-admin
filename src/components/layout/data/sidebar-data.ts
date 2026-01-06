@@ -8,21 +8,20 @@ import {
   HelpCircle,
   Lock,
   Bell,
-  Package,
   Palette,
   ServerOff,
   Settings,
   Wrench,
   UserCog,
   UserX,
-  Users,
   MessagesSquare,
   ShieldCheck,
   AudioWaveform,
   Command,
   GalleryVerticalEnd,
+  Contact,
+  Headphones,
 } from 'lucide-react'
-import { ClerkLogo } from '@/assets/clerk-logo'
 import { type SidebarData } from '../types'
 
 export const sidebarData: SidebarData = {
@@ -33,19 +32,19 @@ export const sidebarData: SidebarData = {
   },
   teams: [
     {
-      name: 'Shadcn Admin',
+      name: 'WA CRM',
       logo: Command,
-      plan: 'Vite + ShadcnUI',
+      plan: 'WhatsApp CRM',
     },
     {
-      name: 'Acme Inc',
+      name: 'VIU Finder',
       logo: GalleryVerticalEnd,
-      plan: 'Enterprise',
+      plan: 'Department',
     },
     {
-      name: 'Acme Corp.',
+      name: 'VIU Finder XP',
       logo: AudioWaveform,
-      plan: 'Startup',
+      plan: 'Department',
     },
   ],
   navGroups: [
@@ -58,14 +57,9 @@ export const sidebarData: SidebarData = {
           icon: LayoutDashboard,
         },
         {
-          title: 'Tasks',
-          url: '/tasks',
-          icon: ListTodo,
-        },
-        {
-          title: 'Apps',
-          url: '/apps',
-          icon: Package,
+          title: 'Contacts',
+          url: '/contacts',
+          icon: Contact,
         },
         {
           title: 'Chats',
@@ -74,28 +68,38 @@ export const sidebarData: SidebarData = {
           icon: MessagesSquare,
         },
         {
-          title: 'Users',
+          title: 'Agents',
           url: '/users',
-          icon: Users,
+          icon: Headphones,
         },
         {
-          title: 'Secured by Clerk',
-          icon: ClerkLogo,
-          items: [
-            {
-              title: 'Sign In',
-              url: '/clerk/sign-in',
-            },
-            {
-              title: 'Sign Up',
-              url: '/clerk/sign-up',
-            },
-            {
-              title: 'User Management',
-              url: '/clerk/user-management',
-            },
-          ],
+          title: 'Tasks',
+          url: '/tasks',
+          icon: ListTodo,
         },
+        // {
+        //   title: 'Apps',
+        //   url: '/apps',
+        //   icon: Package,
+        // },
+        // {
+        //   title: 'Secured by Clerk',
+        //   icon: ClerkLogo,
+        //   items: [
+        //     {
+        //       title: 'Sign In',
+        //       url: '/clerk/sign-in',
+        //     },
+        //     {
+        //       title: 'Sign Up',
+        //       url: '/clerk/sign-up',
+        //     },
+        //     {
+        //       title: 'User Management',
+        //       url: '/clerk/user-management',
+        //     },
+        //   ],
+        // },
       ],
     },
     {

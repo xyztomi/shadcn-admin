@@ -1,13 +1,21 @@
 import { create } from 'zustand'
 import { getCookie, setCookie, removeCookie } from '@/lib/cookies'
 
-const ACCESS_TOKEN = 'thisisjustarandomstring'
+const ACCESS_TOKEN = 'wa_crm_token'
 
-interface AuthUser {
-  accountNo: string
+// Matches backend Agent model
+export interface AuthUser {
+  id: number
+  username: string
   email: string
-  role: string[]
-  exp: number
+  full_name: string
+  role: 'superuser' | 'admin' | 'agent'
+  department: 'viufinder' | 'viufinder_xp'
+  is_online: boolean
+  is_available: boolean
+  is_active: boolean
+  active_chats: number
+  max_chats: number
 }
 
 interface AuthState {
@@ -22,8 +30,7 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>()((set) => {
-  const cookieState = getCookie(ACCESS_TOKEN)
-  const initToken = cookieState ? JSON.parse(cookieState) : ''
+  const initToken = getCookie(ACCESS_TOKEN) || ''
   return {
     auth: {
       user: null,
@@ -32,7 +39,7 @@ export const useAuthStore = create<AuthState>()((set) => {
       accessToken: initToken,
       setAccessToken: (accessToken) =>
         set((state) => {
-          setCookie(ACCESS_TOKEN, JSON.stringify(accessToken))
+          setCookie(ACCESS_TOKEN, accessToken, 60 * 60 * 8) // 8 hours
           return { ...state, auth: { ...state.auth, accessToken } }
         }),
       resetAccessToken: () =>

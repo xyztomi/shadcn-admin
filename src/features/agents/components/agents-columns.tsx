@@ -116,6 +116,11 @@ export const agentsColumns: ColumnDef<Agent>[] = [
   },
   {
     id: 'status',
+    accessorFn: (row) => {
+      if (!row.is_online) return 'offline'
+      if (row.is_available) return 'available'
+      return 'online'
+    },
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Status' />
     ),

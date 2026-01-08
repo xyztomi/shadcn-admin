@@ -44,7 +44,17 @@ export interface Message {
   contact_name?: string | null
   contact_username?: string | null
   status: MessageStatus
+  /** Error message when status is 'failed' (e.g., 24-hour window expired) */
+  error?: string | null
+  /** WhatsApp's message ID for tracking status updates */
+  wa_message_id?: string | null
   timestamp: string
   created_at: string
   updated_at: string
+  /** Timestamp when status became 'sent' */
+  sent_at?: string | null
+  /** Timestamp when status became 'delivered' */
+  delivered_at?: string | null
+  /** Timestamp when status became 'read' */
+  read_at?: string | null
 }

@@ -5,12 +5,19 @@ import { useAuthStore } from '@/stores/auth-store'
 type WebSocketEventType =
   | 'new_message'
   | 'message_status'
+  | 'message_status_update'
   | 'agent_assigned'
   | 'typing'
 
 interface WebSocketEvent {
   type: WebSocketEventType
-  data: unknown
+  data?: unknown
+  // Direct fields for message_status_update events
+  message_id?: number
+  wa_message_id?: string
+  status?: 'pending' | 'sent' | 'delivered' | 'read' | 'failed'
+  timestamp?: string
+  error?: string
 }
 
 interface NewMessageEvent {
@@ -33,6 +40,16 @@ interface MessageStatusEvent {
     message_id: number
     status: 'sent' | 'delivered' | 'read' | 'failed'
   }
+}
+
+// New format from backend webhooks
+interface MessageStatusUpdateEvent {
+  type: 'message_status_update'
+  message_id: number
+  wa_message_id: string
+  status: 'pending' | 'sent' | 'delivered' | 'read' | 'failed'
+  timestamp: string
+  error?: string
 }
 
 interface AgentAssignedEvent {
@@ -116,6 +133,37 @@ export function useWebSocket(onEvent?: WSEventHandler) {
             const statusEvent = data as MessageStatusEvent
             qc.invalidateQueries({
               queryKey: ['conversation', statusEvent.data.wa_id],
+            })
+            break
+          }
+          case 'message_status_update': {
+            // New format from WhatsApp webhooks - update cache optimistically
+            const statusUpdateEvent =
+              data as unknown as MessageStatusUpdateEvent
+            const { message_id, status, error } = statusUpdateEvent
+
+            // Update all conversation caches that might contain this message
+            qc.setQueriesData<{
+              pages: Array<{
+                messages: Array<{
+                  id: string | number
+                  status: string
+                  error?: string
+                }>
+              }>
+            }>({ queryKey: ['conversation'] }, (oldData) => {
+              if (!oldData) return oldData
+              return {
+                ...oldData,
+                pages: oldData.pages.map((page) => ({
+                  ...page,
+                  messages: page.messages.map((msg) =>
+                    String(msg.id) === String(message_id)
+                      ? { ...msg, status, error }
+                      : msg
+                  ),
+                })),
+              }
             })
             break
           }

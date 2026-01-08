@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from 'react'
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { Fragment } from 'react/jsx-runtime'
 import { format } from 'date-fns'
 import {
@@ -8,9 +8,8 @@ import {
   Send,
   MessagesSquare,
   Loader2,
-  Check,
-  CheckCheck,
 } from 'lucide-react'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { useContacts, type Contact } from '@/api/contacts'
 import { useAgents, type Agent } from '@/api/agents'
@@ -29,6 +28,7 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { useAuthStore, type AuthUser } from '@/stores/auth-store'
+import { MessageStatusIcon } from './components/message-status-icon'
 
 const getMessageContent = (msg: Message): string => {
   if (typeof msg.content === 'string' && msg.content.length > 0) return msg.content
@@ -62,23 +62,6 @@ const getMessageSenderName = (
   }
 
   return contact?.name || contact?.phone_number || msg.wa_id
-}
-
-function MessageStatus({ status }: { status: Message['status'] }) {
-  switch (status) {
-    case 'pending':
-      return <Loader2 className='h-3 w-3 animate-spin' />
-    case 'sent':
-      return <Check className='h-3 w-3' />
-    case 'delivered':
-      return <CheckCheck className='h-3 w-3' />
-    case 'read':
-      return <CheckCheck className='h-3 w-3 text-blue-500' />
-    case 'failed':
-      return <span className='text-xs text-destructive'>Failed</span>
-    default:
-      return null
-  }
 }
 
 function getInitials(name: string | null, phone: string): string {
@@ -133,8 +116,22 @@ export function Chats() {
   const sendMutation = useSendMessage()
   const markAsReadMutation = useMarkAsRead()
 
+  // Handle WebSocket events for toast notifications on failed messages
+  const handleWebSocketEvent = useCallback(
+    (event: { type: string; status?: string; error?: string }) => {
+      if (event.type === 'message_status_update' && event.status === 'failed') {
+        const errorMessage = event.error || 'Message failed to deliver'
+        toast.error('Message delivery failed', {
+          description: errorMessage,
+          duration: 8000,
+        })
+      }
+    },
+    []
+  )
+
   // WebSocket for real-time updates
-  useWebSocket()
+  useWebSocket(handleWebSocketEvent)
 
   // Flatten messages from infinite query and sort by timestamp (oldest first for normal display)
   const messages = (conversationData?.pages.flatMap(page => page.messages) ?? [])
@@ -383,6 +380,7 @@ export function Chats() {
                                   agentsById
                                 )
                                 const timestamp = safeFormat(msg.timestamp || msg.created_at, 'h:mm a')
+                                const isFailed = msg.status === 'failed'
 
                                 return (
                                   <div
@@ -391,7 +389,8 @@ export function Chats() {
                                       'max-w-72 px-3 py-2 shadow-lg',
                                       msg.direction === 'outbound'
                                         ? 'self-end rounded-[16px_16px_0_16px] bg-primary/90 text-primary-foreground/75'
-                                        : 'self-start rounded-[16px_16px_16px_0] bg-muted'
+                                        : 'self-start rounded-[16px_16px_16px_0] bg-muted',
+                                      isFailed && msg.direction === 'outbound' && 'border border-destructive/50'
                                     )}
                                   >
                                     {getMessageContent(msg)}
@@ -407,9 +406,18 @@ export function Chats() {
                                       {timestamp && <span aria-hidden='true'>·</span>}
                                       {timestamp}
                                       {msg.direction === 'outbound' && (
-                                        <MessageStatus status={msg.status} />
+                                        <MessageStatusIcon
+                                          status={msg.status}
+                                          error={msg.error}
+                                        />
                                       )}
                                     </span>
+                                    {/* Show error message for failed deliveries */}
+                                    {isFailed && msg.error && (
+                                      <div className='mt-2 border-t border-destructive/30 pt-2 text-[0.65rem] text-destructive'>
+                                        ⚠️ {msg.error}
+                                      </div>
+                                    )}
                                   </div>
                                 )
                               })}

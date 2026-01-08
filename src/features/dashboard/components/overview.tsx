@@ -8,7 +8,6 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  type TooltipProps,
 } from 'recharts'
 import { useMessagesByDate } from '@/api/analytics'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -21,6 +20,15 @@ interface ChartPoint {
   total: number
 }
 
+interface TooltipPayload {
+  payload?: ChartPoint
+}
+
+interface CustomTooltipProps {
+  active?: boolean
+  payload?: TooltipPayload[]
+}
+
 const parseDateSafe = (value: string | null | undefined): Date | null => {
   if (!value) return null
   try {
@@ -31,9 +39,9 @@ const parseDateSafe = (value: string | null | undefined): Date | null => {
   }
 }
 
-function MessagesTooltip({ active, payload }: TooltipProps<string, string>) {
+function MessagesTooltip({ active, payload }: CustomTooltipProps) {
   if (!active || !payload?.length) return null
-  const point = payload[0]?.payload as ChartPoint | undefined
+  const point = payload[0]?.payload
   if (!point) return null
 
   return (
@@ -76,12 +84,12 @@ export function Overview() {
   }, [data])
 
   if (isLoading) {
-    return <Skeleton className='h-[320px] w-full' />
+    return <Skeleton className='h-80 w-full' />
   }
 
   if (chartData.length === 0) {
     return (
-      <div className='flex h-[320px] w-full items-center justify-center text-sm text-muted-foreground'>
+      <div className='flex h-80 w-full items-center justify-center text-sm text-muted-foreground'>
         No message activity for this range.
       </div>
     )

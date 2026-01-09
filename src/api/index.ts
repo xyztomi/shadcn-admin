@@ -37,3 +37,6 @@ export * from './tags'
 
 // Quick Replies exports
 export * from './quick-replies'
+
+// Broadcast exports
+export * from './broadcast'

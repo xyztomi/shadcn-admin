@@ -12,8 +12,6 @@ import {
   Palette,
   ServerOff,
   Settings,
-  Wrench,
-  UserCog,
   UserX,
   MessagesSquare,
   ShieldCheck,
@@ -22,6 +20,10 @@ import {
   GalleryVerticalEnd,
   Contact,
   Headphones,
+  Radio,
+  Clock,
+  Tag,
+  Zap,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -67,6 +69,11 @@ export const sidebarData: SidebarData = {
           url: '/chats',
           badge: '3',
           icon: MessagesSquare,
+        },
+        {
+          title: 'Broadcast',
+          url: '/broadcast',
+          icon: Radio,
         },
         {
           title: 'Tasks',
@@ -164,14 +171,19 @@ export const sidebarData: SidebarData = {
           icon: Settings,
           items: [
             {
-              title: 'Profile',
+              title: 'Shifts',
               url: '/settings',
-              icon: UserCog,
+              icon: Clock,
             },
             {
-              title: 'Account',
-              url: '/settings/account',
-              icon: Wrench,
+              title: 'Tags',
+              url: '/settings/tags',
+              icon: Tag,
+            },
+            {
+              title: 'Quick Replies',
+              url: '/settings/quick-replies',
+              icon: Zap,
             },
             {
               title: 'Appearance',

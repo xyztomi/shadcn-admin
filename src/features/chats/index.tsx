@@ -8,6 +8,7 @@ import {
   Send,
   MessagesSquare,
   Loader2,
+  Radio,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -390,6 +391,7 @@ export function Chats() {
                                 )
                                 const timestamp = safeFormat(msg.timestamp || msg.created_at, 'h:mm a')
                                 const isFailed = msg.status === 'failed'
+                                const isBroadcast = !!msg.broadcast_id
 
                                 return (
                                   <div
@@ -402,6 +404,18 @@ export function Chats() {
                                       isFailed && msg.direction === 'outbound' && 'border border-destructive/50'
                                     )}
                                   >
+                                    {/* Broadcast indicator */}
+                                    {isBroadcast && (
+                                      <div className={cn(
+                                        'mb-1 flex items-center gap-1 text-[0.65rem]',
+                                        msg.direction === 'outbound'
+                                          ? 'text-primary-foreground/70'
+                                          : 'text-muted-foreground'
+                                      )}>
+                                        <Radio className='h-3 w-3' />
+                                        <span>Broadcast message</span>
+                                      </div>
+                                    )}
                                     {getMessageContent(msg)}
                                     <span
                                       className={cn(

@@ -29,6 +29,8 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { useAuthStore, type AuthUser } from '@/stores/auth-store'
 import { MessageStatusIcon } from './components/message-status-icon'
+import { TagSelector } from './components/tag-selector'
+import { QuickReplyPicker } from './components/quick-reply-picker'
 
 const getMessageContent = (msg: Message): string => {
   if (typeof msg.content === 'string' && msg.content.length > 0) return msg.content
@@ -89,6 +91,7 @@ export function Chats() {
   const [mobileSelectedContact, setMobileSelectedContact] = useState<Contact | null>(null)
   const [messageText, setMessageText] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messageInputRef = useRef<HTMLInputElement>(null)
   const currentUser = useAuthStore((state) => state.auth.user)
 
   // Fetch contacts for the chat list
@@ -305,38 +308,44 @@ export function Chats() {
               )}
             >
               {/* Chat Header */}
-              <div className='mb-1 flex flex-none justify-between bg-card p-4 shadow-lg sm:rounded-t-md'>
-                <div className='flex gap-3'>
-                  <Button
-                    size='icon'
-                    variant='ghost'
-                    className='-ms-2 h-full sm:hidden'
-                    onClick={() => setMobileSelectedContact(null)}
-                  >
-                    <ArrowLeft className='rtl:rotate-180' />
-                  </Button>
-                  <div className='flex items-center gap-2 lg:gap-4'>
-                    <Avatar className='size-9 lg:size-11'>
-                      <AvatarFallback>
-                        {getInitials(selectedContact.name, selectedContact.phone_number)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <span className='text-sm font-medium lg:text-base'>
-                        {selectedContact.name || selectedContact.phone_number}
-                      </span>
-                      <span className='block text-xs text-muted-foreground'>
-                        {selectedContact.phone_number}
-                        {selectedContact.assigned_agent_name && (
-                          <> · {selectedContact.assigned_agent_name}</>
-                        )}
-                      </span>
+              <div className='mb-1 flex flex-none flex-col bg-card p-4 shadow-lg sm:rounded-t-md'>
+                <div className='flex justify-between'>
+                  <div className='flex gap-3'>
+                    <Button
+                      size='icon'
+                      variant='ghost'
+                      className='-ms-2 h-full sm:hidden'
+                      onClick={() => setMobileSelectedContact(null)}
+                    >
+                      <ArrowLeft className='rtl:rotate-180' />
+                    </Button>
+                    <div className='flex items-center gap-2 lg:gap-4'>
+                      <Avatar className='size-9 lg:size-11'>
+                        <AvatarFallback>
+                          {getInitials(selectedContact.name, selectedContact.phone_number)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <span className='text-sm font-medium lg:text-base'>
+                          {selectedContact.name || selectedContact.phone_number}
+                        </span>
+                        <span className='block text-xs text-muted-foreground'>
+                          {selectedContact.phone_number}
+                          {selectedContact.assigned_agent_name && (
+                            <> · {selectedContact.assigned_agent_name}</>
+                          )}
+                        </span>
+                      </div>
                     </div>
                   </div>
+                  <Button size='icon' variant='ghost' className='h-10 rounded-md'>
+                    <MoreVertical className='stroke-muted-foreground' />
+                  </Button>
                 </div>
-                <Button size='icon' variant='ghost' className='h-10 rounded-md'>
-                  <MoreVertical className='stroke-muted-foreground' />
-                </Button>
+                {/* Tags */}
+                <div className='mt-2 ps-12 lg:ps-16'>
+                  <TagSelector waId={selectedContact.wa_id} />
+                </div>
               </div>
 
               {/* Messages */}
@@ -434,9 +443,14 @@ export function Chats() {
                 {/* Message Input */}
                 <form onSubmit={handleSendMessage} className='flex w-full flex-none gap-2'>
                   <div className='flex flex-1 items-center gap-2 rounded-md border border-input bg-card px-2 py-1 focus-within:ring-1 focus-within:ring-ring'>
+                    <QuickReplyPicker
+                      onSelect={(content) => setMessageText(content)}
+                      inputRef={messageInputRef}
+                    />
                     <input
+                      ref={messageInputRef}
                       type='text'
-                      placeholder='Type your message...'
+                      placeholder='Type your message... (/ for quick replies)'
                       className='h-8 w-full flex-1 bg-inherit focus-visible:outline-hidden'
                       value={messageText}
                       onChange={(e) => setMessageText(e.target.value)}

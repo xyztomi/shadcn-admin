@@ -31,3 +31,9 @@ export * from './attendance'
 
 // Templates exports
 export * from './templates'
+
+// Tags exports
+export * from './tags'
+
+// Quick Replies exports
+export * from './quick-replies'

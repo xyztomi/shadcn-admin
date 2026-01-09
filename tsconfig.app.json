@@ -6,6 +6,7 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
+    "ignoreDeprecations": "6.0",
 
     /* Bundler mode */
     "moduleResolution": "Bundler",
@@ -20,9 +21,6 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-
-    /* Silence deprecation for baseUrl until migration */
-    "ignoreDeprecations": "5.0",
 
     /* Linting */
     "strict": true,

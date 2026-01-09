@@ -350,14 +350,14 @@ export function QuickRepliesSettings() {
                       <FormLabel>Category (optional)</FormLabel>
                       <FormControl>
                         <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
+                          onValueChange={(val) => field.onChange(val === '__none__' ? '' : val)}
+                          value={field.value || '__none__'}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder='Select or type new' />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value=''>None</SelectItem>
+                            <SelectItem value='__none__'>None</SelectItem>
                             {categories.map((cat: string) => (
                               <SelectItem key={cat} value={cat}>
                                 {cat}

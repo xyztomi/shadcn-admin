@@ -74,13 +74,24 @@ function getInitials(name: string | null, phone: string): string {
   return phone.slice(-2)
 }
 
-// Safe date formatting helper
+// Convert UTC date to Jakarta time (UTC+7)
+function toJakartaTime(date: Date): Date {
+  // Jakarta is UTC+7
+  // Simply add 7 hours to the UTC timestamp
+  const JAKARTA_OFFSET_MS = 7 * 60 * 60 * 1000
+  return new Date(date.getTime() + JAKARTA_OFFSET_MS)
+}
+
+// Safe date formatting helper (converts to Jakarta time)
 function safeFormat(dateStr: string | null | undefined, formatStr: string, fallback = ''): string {
   if (!dateStr) return fallback
   try {
+    // Parse the date as UTC
     const date = new Date(dateStr)
     if (isNaN(date.getTime())) return fallback
-    return format(date, formatStr)
+    // Convert to Jakarta and format
+    const jakartaDate = toJakartaTime(date)
+    return format(jakartaDate, formatStr)
   } catch {
     return fallback
   }
@@ -152,7 +163,7 @@ export function Chats() {
         acc['Unknown'].push(msg)
         return acc
       }
-      const key = format(date, 'd MMM, yyyy')
+      const key = format(toJakartaTime(date), 'd MMM, yyyy')
       if (!acc[key]) acc[key] = []
       acc[key].push(msg)
     } catch {

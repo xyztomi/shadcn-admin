@@ -16,6 +16,18 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import { toast } from 'sonner'
+
+// Convert UTC date to Jakarta time (UTC+7)
+function toJakartaTime(date: Date): Date {
+  const JAKARTA_OFFSET_MS = 7 * 60 * 60 * 1000
+  return new Date(date.getTime() + JAKARTA_OFFSET_MS)
+}
+
+function formatJakarta(dateStr: string, formatStr: string): string {
+  const date = new Date(dateStr)
+  return format(toJakartaTime(date), formatStr)
+}
+
 import {
   useBroadcasts,
   useDeleteBroadcast,
@@ -193,11 +205,11 @@ export function BroadcastPage() {
 
                     {/* Timestamps */}
                     <div className='text-xs text-muted-foreground mb-3'>
-                      Created {format(new Date(broadcast.created_at), 'MMM d, yyyy HH:mm')}
+                      Created {formatJakarta(broadcast.created_at, 'MMM d, yyyy HH:mm')}
                       {broadcast.completed_at && (
                         <span className='block'>
                           Completed{' '}
-                          {format(new Date(broadcast.completed_at), 'MMM d, yyyy HH:mm')}
+                          {formatJakarta(broadcast.completed_at, 'MMM d, yyyy HH:mm')}
                         </span>
                       )}
                     </div>

@@ -10,6 +10,7 @@ export interface AgentFilters {
   department?: AgentDepartment
   is_available?: boolean
   is_online?: boolean
+  shift_id?: number
 }
 
 export interface CreateAgentPayload {
@@ -20,6 +21,7 @@ export interface CreateAgentPayload {
   role: AgentRole
   department: AgentDepartment
   max_chats?: number
+  shift_id?: number | null
 }
 
 export interface UpdateAgentPayload {
@@ -29,6 +31,7 @@ export interface UpdateAgentPayload {
   role?: AgentRole
   department?: AgentDepartment
   max_chats?: number
+  shift_id?: number | null
 }
 
 // List agents with filters

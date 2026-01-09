@@ -21,6 +21,8 @@ export interface Agent {
   is_active: boolean
   active_chats: number
   max_chats: number
+  shift_id: number | null
+  shift_name: string | null
   created_at: string
   updated_at: string
 }

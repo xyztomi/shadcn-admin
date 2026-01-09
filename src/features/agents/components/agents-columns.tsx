@@ -17,6 +17,11 @@ export const roleColors: Record<string, string> = {
   agent: 'bg-blue-100/30 text-blue-900 dark:text-blue-200 border-blue-200',
 }
 
+export const shiftColors: Record<string, string> = {
+  morning: 'bg-orange-100/30 text-orange-900 dark:text-orange-200 border-orange-200',
+  noon: 'bg-sky-100/30 text-sky-900 dark:text-sky-200 border-sky-200',
+}
+
 export const agentsColumns: ColumnDef<Agent>[] = [
   {
     id: 'select',
@@ -112,6 +117,29 @@ export const agentsColumns: ColumnDef<Agent>[] = [
     },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
+    },
+  },
+  {
+    accessorKey: 'shift_name',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Shift' />
+    ),
+    cell: ({ row }) => {
+      const shiftName = row.getValue<string | null>('shift_name')
+      if (!shiftName) {
+        return <span className='text-muted-foreground'>—</span>
+      }
+      const badgeColor = shiftColors[shiftName.toLowerCase()] ?? 'bg-gray-100/30 text-gray-900 dark:text-gray-200 border-gray-200'
+      return (
+        <Badge variant='outline' className={cn('capitalize', badgeColor)}>
+          {shiftName}
+        </Badge>
+      )
+    },
+    filterFn: (row, id, value) => {
+      const shiftName = row.getValue<string | null>(id)
+      if (!shiftName) return value.includes('unassigned')
+      return value.includes(shiftName.toLowerCase())
     },
   },
   {

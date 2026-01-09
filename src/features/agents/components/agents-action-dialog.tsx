@@ -9,6 +9,7 @@ import {
   type CreateAgentPayload,
   type UpdateAgentPayload,
 } from '@/api/agents'
+import { useShifts } from '@/api/shifts'
 import { handleServerError } from '@/lib/handle-server-error'
 import { Button } from '@/components/ui/button'
 import {
@@ -46,6 +47,7 @@ const agentFormSchema = z.object({
   department: z.enum(['viufinder', 'viufinder_xp']),
   role: z.enum(['admin', 'manager', 'agent']),
   max_chats: z.number().int().min(0),
+  shift_id: z.string().optional(),
 })
 
 type AgentForm = z.infer<typeof agentFormSchema>
@@ -54,6 +56,7 @@ export function AgentsActionDialog() {
   const { open, setOpen, currentRow, setCurrentRow } = useAgentsContext()
   const createMutation = useCreateAgent()
   const updateMutation = useUpdateAgent()
+  const { data: shifts = [] } = useShifts({ is_active: true })
 
   const isEdit = open === 'edit' && currentRow !== null
   const isAdd = open === 'add'
@@ -68,6 +71,7 @@ export function AgentsActionDialog() {
       department: 'viufinder',
       role: 'agent',
       max_chats: 0,
+      shift_id: '',
     },
   })
 
@@ -82,6 +86,7 @@ export function AgentsActionDialog() {
         role: currentRow.role,
         max_chats: currentRow.max_chats,
         password: '',
+        shift_id: currentRow.shift_id?.toString() || '',
       })
     } else if (isAdd) {
       form.reset({
@@ -92,6 +97,7 @@ export function AgentsActionDialog() {
         department: 'viufinder',
         role: 'agent',
         max_chats: 0,
+        shift_id: '',
       })
     }
   }, [isEdit, isAdd, currentRow, form])
@@ -106,6 +112,8 @@ export function AgentsActionDialog() {
 
   const onSubmit = async (data: AgentForm) => {
     try {
+      const shiftId = data.shift_id ? parseInt(data.shift_id) : null
+
       if (isEdit && currentRow) {
         const payload: UpdateAgentPayload = {
           full_name: data.full_name,
@@ -113,6 +121,7 @@ export function AgentsActionDialog() {
           department: data.department,
           role: data.role,
           max_chats: data.max_chats,
+          shift_id: shiftId,
         }
         if (data.password) {
           payload.password = data.password
@@ -132,6 +141,7 @@ export function AgentsActionDialog() {
           department: data.department,
           role: data.role,
           max_chats: data.max_chats,
+          shift_id: shiftId,
         }
         await createMutation.mutateAsync(payload)
         toast.success('Agent created successfully')
@@ -269,6 +279,31 @@ export function AgentsActionDialog() {
                   <FormControl>
                     <Input type='number' min={0} {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='shift_id'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Shift</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder='Select shift (optional)' />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value=''>No shift assigned</SelectItem>
+                      {shifts.map((shift) => (
+                        <SelectItem key={shift.id} value={shift.id.toString()}>
+                          {shift.name} ({shift.start_time} - {shift.end_time})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

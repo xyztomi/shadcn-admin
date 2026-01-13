@@ -46,7 +46,6 @@ const agentFormSchema = z.object({
   email: z.string().email().optional().or(z.literal('')),
   department: z.enum(['viufinder', 'viufinder_xp']),
   role: z.enum(['admin', 'manager', 'agent']),
-  max_chats: z.number().int().min(0),
   shift_id: z.string().optional(),
 })
 
@@ -70,7 +69,6 @@ export function AgentsActionDialog() {
       email: '',
       department: 'viufinder',
       role: 'agent',
-      max_chats: 0,
       shift_id: '',
     },
   })
@@ -84,7 +82,6 @@ export function AgentsActionDialog() {
         email: currentRow.email || '',
         department: currentRow.department,
         role: currentRow.role,
-        max_chats: currentRow.max_chats,
         password: '',
         shift_id: currentRow.shift_id?.toString() || '',
       })
@@ -96,7 +93,6 @@ export function AgentsActionDialog() {
         email: '',
         department: 'viufinder',
         role: 'agent',
-        max_chats: 0,
         shift_id: '',
       })
     }
@@ -120,7 +116,6 @@ export function AgentsActionDialog() {
           email: data.email || undefined,
           department: data.department,
           role: data.role,
-          max_chats: data.max_chats,
           shift_id: shiftId,
         }
         if (data.password) {
@@ -140,7 +135,6 @@ export function AgentsActionDialog() {
           email: data.email || undefined,
           department: data.department,
           role: data.role,
-          max_chats: data.max_chats,
           shift_id: shiftId,
         }
         await createMutation.mutateAsync(payload)
@@ -263,50 +257,28 @@ export function AgentsActionDialog() {
                         <SelectItem value='admin'>Admin</SelectItem>
                         <SelectItem value='manager'>Manager</SelectItem>
                         <SelectItem value='agent'>Agent</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <FormField
-              control={form.control}
-              name='max_chats'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Max Concurrent Chats (0 = unlimited)</FormLabel>
+                      </SelectContent>\n                    </Select>\n                    <FormMessage>\n                  </FormItem>\n                )}\n              />\n            </div>\n            <FormField\n              control={form.control}\n              name='shift_id'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Shift</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <Input type='number' min={0} {...field} />
+                    <SelectTrigger>
+                      <SelectValue placeholder='Select shift (optional)' />
+                    </SelectTrigger>
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='shift_id'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Shift</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder='Select shift (optional)' />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value=''>No shift assigned</SelectItem>
-                      {shifts.map((shift) => (
-                        <SelectItem key={shift.id} value={shift.id.toString()}>
-                          {shift.name} ({shift.start_time} - {shift.end_time})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+                  <SelectContent>
+                    <SelectItem value=''>No shift assigned</SelectItem>
+                    {shifts.map((shift) => (
+                      <SelectItem key={shift.id} value={shift.id.toString()}>
+                        {shift.name} ({shift.start_time} - {shift.end_time})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
             />
             <DialogFooter>
               <Button type='submit' disabled={isPending}>

@@ -15,7 +15,6 @@ export interface AgentStats {
   username: string
   full_name: string
   department: string
-  active_chats: number
   resolved_today: number
   avg_response_time: number
   is_online: boolean

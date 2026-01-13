@@ -69,9 +69,6 @@ export interface AgentPerformance {
   department: 'viufinder' | 'viufinder_xp'
   is_online: boolean
   is_available: boolean
-  active_chats: number
-  max_chats: number
-  workload_percent: number
   total_conversations: number
   total_messages_sent: number
   total_resolved: number

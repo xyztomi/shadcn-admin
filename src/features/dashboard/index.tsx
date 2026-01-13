@@ -290,9 +290,7 @@ export function Dashboard() {
                             {agent.full_name || agent.username}
                           </p>
                           <p className='text-xs text-muted-foreground'>
-                            {agent.department === 'viufinder_xp' ? 'Viufinder XP' : 'Viufinder'} ·
-                            {' '}
-                            {agent.active_chats} chats
+                            {agent.department === 'viufinder_xp' ? 'Viufinder XP' : 'Viufinder'}
                           </p>
                         </div>
                         <div className='text-right text-xs text-muted-foreground'>

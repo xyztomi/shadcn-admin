@@ -14,8 +14,6 @@ export interface AuthUser {
   is_online: boolean
   is_available: boolean
   is_active: boolean
-  active_chats: number
-  max_chats: number
 }
 
 interface AuthState {

@@ -22,7 +22,6 @@ export interface RegisterPayload {
   email?: string
   role: AgentRole
   department: AgentDepartment
-  max_chats?: number
 }
 
 // Login mutation

@@ -177,35 +177,6 @@ export const agentsColumns: ColumnDef<Agent>[] = [
     },
   },
   {
-    id: 'workload',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Workload' />
-    ),
-    cell: ({ row }) => {
-      const { active_chats, max_chats } = row.original
-      const maxLabel = max_chats === 0 ? '∞' : max_chats
-      const percentage = max_chats > 0 ? Math.round((active_chats / max_chats) * 100) : 0
-      return (
-        <div className='flex items-center gap-2'>
-          <span className='text-sm'>
-            {active_chats} / {maxLabel}
-          </span>
-          {max_chats > 0 && (
-            <div className='h-2 w-16 rounded-full bg-muted'>
-              <div
-                className={cn(
-                  'h-2 rounded-full transition-all',
-                  percentage >= 90 ? 'bg-red-500' : percentage >= 70 ? 'bg-amber-500' : 'bg-green-500'
-                )}
-                style={{ width: `${Math.min(percentage, 100)}%` }}
-              />
-            </div>
-          )}
-        </div>
-      )
-    },
-  },
-  {
     id: 'actions',
     cell: DataTableRowActions,
     meta: {

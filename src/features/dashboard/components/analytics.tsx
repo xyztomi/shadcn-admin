@@ -288,11 +288,7 @@ export function Analytics() {
                         </Badge>
                       ) : null}
                     </div>
-                    <div className='grid grid-cols-4 gap-2 text-center text-sm'>
-                      <div>
-                        <div className='font-medium'>{agent.active_chats}</div>
-                        <div className='text-xs text-muted-foreground'>Active</div>
-                      </div>
+                    <div className='grid grid-cols-3 gap-2 text-center text-sm'>
                       <div>
                         <div className='font-medium'>{agent.total_resolved}</div>
                         <div className='text-xs text-muted-foreground'>Resolved</div>

@@ -20,7 +20,6 @@ export interface CreateAgentPayload {
   email?: string
   role: AgentRole
   department: AgentDepartment
-  max_chats?: number
   shift_id?: number | null
 }
 
@@ -30,7 +29,6 @@ export interface UpdateAgentPayload {
   password?: string
   role?: AgentRole
   department?: AgentDepartment
-  max_chats?: number
   shift_id?: number | null
 }
 

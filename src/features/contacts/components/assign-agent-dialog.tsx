@@ -81,7 +81,6 @@ export function AssignAgentDialog() {
                 .map((agent) => (
                   <SelectItem key={agent.id} value={agent.id.toString()}>
                     {agent.full_name || agent.username}
-                    {agent.active_chats > 0 && ` (${agent.active_chats} chats)`}
                   </SelectItem>
                 ))
             )}

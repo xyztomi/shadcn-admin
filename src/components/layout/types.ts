@@ -6,12 +6,6 @@ type User = {
   avatar: string
 }
 
-type Team = {
-  name: string
-  logo: React.ElementType
-  plan: string
-}
-
 // Roles that can access a nav item (empty = all roles)
 type UserRole = 'superuser' | 'admin' | 'manager' | 'agent'
 
@@ -42,7 +36,6 @@ type NavGroup = {
 
 type SidebarData = {
   user: User
-  teams: Team[]
   navGroups: NavGroup[]
 }
 

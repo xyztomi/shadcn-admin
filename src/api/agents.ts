@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { type Agent, type Contact, AgentRole, AgentDepartment } from '@/types'
+import { useDepartmentStore } from '@/stores/department-store'
 import { api } from './client'
 
 // Re-export for convenience
@@ -32,9 +33,16 @@ export interface UpdateAgentPayload {
   shift_id?: number | null
 }
 
-// List agents with filters
+// List agents with filters (auto-filtered by selected department)
 export function useAgents(filters?: AgentFilters) {
+  const { selectedDepartment } = useDepartmentStore()
   const params = new URLSearchParams()
+
+  // Add department filter from store
+  if (selectedDepartment && selectedDepartment !== 'all') {
+    params.append('department', selectedDepartment)
+  }
+
   if (filters) {
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined) {
@@ -44,7 +52,7 @@ export function useAgents(filters?: AgentFilters) {
   }
 
   return useQuery({
-    queryKey: ['agents', filters],
+    queryKey: ['agents', selectedDepartment, filters],
     queryFn: async (): Promise<Agent[]> => {
       const response = await api.get(`/agents?${params.toString()}`)
       return response.data

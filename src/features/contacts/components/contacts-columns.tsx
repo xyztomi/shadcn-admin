@@ -75,16 +75,6 @@ export const contactsColumns: ColumnDef<Contact>[] = [
     },
   },
   {
-    accessorKey: 'assigned_agent_name',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Assigned To' />
-    ),
-    cell: ({ row }) => {
-      const agent = row.getValue('assigned_agent_name') as string | null
-      return agent || <span className='text-muted-foreground'>Unassigned</span>
-    },
-  },
-  {
     accessorKey: 'unread_count',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Unread' />

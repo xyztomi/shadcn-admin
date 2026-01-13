@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { type Contact, ServiceTag } from '@/types'
+import { useDepartmentStore } from '@/stores/department-store'
 import { api } from './client'
 
 // Re-export for convenience
@@ -8,16 +9,22 @@ export { ServiceTag }
 
 export interface ContactFilters {
   service_tag?: ServiceTag
-  assigned_agent_id?: number
   is_active?: boolean
-  unassigned?: boolean
   limit?: number
   offset?: number
 }
 
-// List contacts with filters
+// List contacts with filters (auto-filtered by selected department)
 export function useContacts(filters?: ContactFilters) {
+  const { selectedDepartment } = useDepartmentStore()
+
   const params = new URLSearchParams()
+
+  // Add department filter
+  if (selectedDepartment) {
+    params.append('department', selectedDepartment)
+  }
+
   if (filters) {
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined) {
@@ -27,7 +34,7 @@ export function useContacts(filters?: ContactFilters) {
   }
 
   return useQuery({
-    queryKey: ['contacts', filters],
+    queryKey: ['contacts', selectedDepartment, filters],
     queryFn: async (): Promise<Contact[]> => {
       const response = await api.get(`/contacts?${params.toString()}`)
       return response.data
@@ -67,44 +74,6 @@ export function useUpdateContact() {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['contacts'] })
       queryClient.invalidateQueries({ queryKey: ['contacts', variables.waId] })
-    },
-  })
-}
-
-// Assign contact to agent
-export function useAssignContact() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: async ({
-      waId,
-      agentId,
-    }: {
-      waId: string
-      agentId: number
-    }) => {
-      const response = await api.post(`/contacts/${waId}/assign`, {
-        agent_id: agentId,
-      })
-      return response.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['contacts'] })
-      queryClient.invalidateQueries({ queryKey: ['stats'] })
-    },
-  })
-}
-
-// Unassign contact
-export function useUnassignContact() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: async (waId: string) => {
-      const response = await api.post(`/contacts/${waId}/unassign`)
-      return response.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['contacts'] })
-      queryClient.invalidateQueries({ queryKey: ['stats'] })
     },
   })
 }

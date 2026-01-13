@@ -8,8 +8,6 @@ export const contactSchema = z.object({
   name: z.string().nullable(),
   phone_number: z.string(),
   service_tag: serviceTagSchema.nullable(),
-  assigned_agent_id: z.number().nullable(),
-  assigned_agent_name: z.string().nullable(),
   is_active: z.boolean(),
   notes: z.string().nullable(),
   last_message_at: z.string().nullable(),

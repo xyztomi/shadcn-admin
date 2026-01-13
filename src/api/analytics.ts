@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useDepartmentStore } from '@/stores/department-store'
 import { api } from './client'
 
 // Types for Analytics API responses
@@ -99,12 +100,14 @@ export interface DepartmentsSummary {
 
 // Overview Analytics
 export function useAnalyticsOverview(startDate?: string, endDate?: string) {
+  const { selectedDepartment } = useDepartmentStore()
   const params = new URLSearchParams()
   if (startDate) params.append('start_date', startDate)
   if (endDate) params.append('end_date', endDate)
+  if (selectedDepartment) params.append('department', selectedDepartment)
 
   return useQuery({
-    queryKey: ['analytics', 'overview', startDate, endDate],
+    queryKey: ['analytics', 'overview', startDate, endDate, selectedDepartment],
     queryFn: async (): Promise<AnalyticsOverview> => {
       const response = await api.get(`/analytics/overview?${params.toString()}`)
       return response.data
@@ -115,10 +118,15 @@ export function useAnalyticsOverview(startDate?: string, endDate?: string) {
 
 // Message Analytics - By Date
 export function useMessagesByDate(days = 30) {
+  const { selectedDepartment } = useDepartmentStore()
   return useQuery({
-    queryKey: ['analytics', 'messages-by-date', days],
+    queryKey: ['analytics', 'messages-by-date', days, selectedDepartment],
     queryFn: async (): Promise<MessageByDate[]> => {
-      const response = await api.get(`/analytics/messages/by-date?days=${days}`)
+      const params = new URLSearchParams({ days: String(days) })
+      if (selectedDepartment) params.append('department', selectedDepartment)
+      const response = await api.get(
+        `/analytics/messages/by-date?${params.toString()}`
+      )
       return response.data
     },
   })
@@ -126,10 +134,15 @@ export function useMessagesByDate(days = 30) {
 
 // Message Analytics - By Hour
 export function useMessagesByHour() {
+  const { selectedDepartment } = useDepartmentStore()
   return useQuery({
-    queryKey: ['analytics', 'messages-by-hour'],
+    queryKey: ['analytics', 'messages-by-hour', selectedDepartment],
     queryFn: async (): Promise<MessageByHour[]> => {
-      const response = await api.get('/analytics/messages/by-hour')
+      const params = new URLSearchParams()
+      if (selectedDepartment) params.append('department', selectedDepartment)
+      const response = await api.get(
+        `/analytics/messages/by-hour?${params.toString()}`
+      )
       return response.data
     },
   })
@@ -137,10 +150,15 @@ export function useMessagesByHour() {
 
 // Message Analytics - By Type
 export function useMessagesByType() {
+  const { selectedDepartment } = useDepartmentStore()
   return useQuery({
-    queryKey: ['analytics', 'messages-by-type'],
+    queryKey: ['analytics', 'messages-by-type', selectedDepartment],
     queryFn: async (): Promise<MessageByType[]> => {
-      const response = await api.get('/analytics/messages/by-type')
+      const params = new URLSearchParams()
+      if (selectedDepartment) params.append('department', selectedDepartment)
+      const response = await api.get(
+        `/analytics/messages/by-type?${params.toString()}`
+      )
       return response.data
     },
   })
@@ -148,10 +166,15 @@ export function useMessagesByType() {
 
 // Contact Analytics - By Date
 export function useContactsByDate(days = 30) {
+  const { selectedDepartment } = useDepartmentStore()
   return useQuery({
-    queryKey: ['analytics', 'contacts-by-date', days],
+    queryKey: ['analytics', 'contacts-by-date', days, selectedDepartment],
     queryFn: async (): Promise<ContactByDate[]> => {
-      const response = await api.get(`/analytics/contacts/by-date?days=${days}`)
+      const params = new URLSearchParams({ days: String(days) })
+      if (selectedDepartment) params.append('department', selectedDepartment)
+      const response = await api.get(
+        `/analytics/contacts/by-date?${params.toString()}`
+      )
       return response.data
     },
   })
@@ -159,10 +182,15 @@ export function useContactsByDate(days = 30) {
 
 // Contact Analytics - By Service
 export function useContactsByService() {
+  const { selectedDepartment } = useDepartmentStore()
   return useQuery({
-    queryKey: ['analytics', 'contacts-by-service'],
+    queryKey: ['analytics', 'contacts-by-service', selectedDepartment],
     queryFn: async (): Promise<ContactByService[]> => {
-      const response = await api.get('/analytics/contacts/by-service')
+      const params = new URLSearchParams()
+      if (selectedDepartment) params.append('department', selectedDepartment)
+      const response = await api.get(
+        `/analytics/contacts/by-service?${params.toString()}`
+      )
       return response.data
     },
   })
@@ -170,10 +198,15 @@ export function useContactsByService() {
 
 // Agent Performance
 export function useAgentPerformance() {
+  const { selectedDepartment } = useDepartmentStore()
   return useQuery({
-    queryKey: ['analytics', 'agent-performance'],
+    queryKey: ['analytics', 'agent-performance', selectedDepartment],
     queryFn: async (): Promise<AgentPerformance[]> => {
-      const response = await api.get('/analytics/agents/performance')
+      const params = new URLSearchParams()
+      if (selectedDepartment) params.append('department', selectedDepartment)
+      const response = await api.get(
+        `/analytics/agents/performance?${params.toString()}`
+      )
       return response.data
     },
     refetchInterval: 60000, // Refetch every 60 seconds
@@ -182,10 +215,15 @@ export function useAgentPerformance() {
 
 // Department Summary
 export function useDepartmentsSummary() {
+  const { selectedDepartment } = useDepartmentStore()
   return useQuery({
-    queryKey: ['analytics', 'departments-summary'],
+    queryKey: ['analytics', 'departments-summary', selectedDepartment],
     queryFn: async (): Promise<DepartmentsSummary> => {
-      const response = await api.get('/analytics/departments/summary')
+      const params = new URLSearchParams()
+      if (selectedDepartment) params.append('department', selectedDepartment)
+      const response = await api.get(
+        `/analytics/departments/summary?${params.toString()}`
+      )
       return response.data
     },
     refetchInterval: 30000, // Refetch every 30 seconds

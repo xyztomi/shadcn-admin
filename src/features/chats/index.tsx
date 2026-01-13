@@ -343,9 +343,6 @@ export function Chats() {
                         </span>
                         <span className='block text-xs text-muted-foreground'>
                           {selectedContact.phone_number}
-                          {selectedContact.assigned_agent_name && (
-                            <> · {selectedContact.assigned_agent_name}</>
-                          )}
                         </span>
                       </div>
                     </div>

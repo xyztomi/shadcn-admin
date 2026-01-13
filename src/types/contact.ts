@@ -8,8 +8,6 @@ export interface Contact {
   name: string | null
   phone_number: string
   service_tag: ServiceTag | null
-  assigned_agent_id: number | null
-  assigned_agent_name: string | null
   is_active: boolean
   notes: string | null
   last_message_at: string | null

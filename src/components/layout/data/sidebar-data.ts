@@ -15,9 +15,6 @@ import {
   // UserX,
   MessagesSquare,
   // ShieldCheck,
-  AudioWaveform,
-  Command,
-  GalleryVerticalEnd,
   Contact,
   Headphones,
   Radio,
@@ -33,23 +30,6 @@ export const sidebarData: SidebarData = {
     email: 'satnaingdev@gmail.com',
     avatar: '/avatars/shadcn.jpg',
   },
-  teams: [
-    {
-      name: 'WA CRM',
-      logo: Command,
-      plan: 'WhatsApp CRM',
-    },
-    {
-      name: 'VIU Finder',
-      logo: GalleryVerticalEnd,
-      plan: 'Department',
-    },
-    {
-      name: 'VIU Finder XP',
-      logo: AudioWaveform,
-      plan: 'Department',
-    },
-  ],
   navGroups: [
     {
       title: 'General',

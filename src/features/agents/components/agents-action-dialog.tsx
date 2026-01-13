@@ -257,28 +257,37 @@ export function AgentsActionDialog() {
                         <SelectItem value='admin'>Admin</SelectItem>
                         <SelectItem value='manager'>Manager</SelectItem>
                         <SelectItem value='agent'>Agent</SelectItem>
-                      </SelectContent>\n                    </Select>\n                    <FormMessage>\n                  </FormItem>\n                )}\n              />\n            </div>\n            <FormField\n              control={form.control}\n              name='shift_id'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Shift</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder='Select shift (optional)' />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value=''>No shift assigned</SelectItem>
-                    {shifts.map((shift) => (
-                      <SelectItem key={shift.id} value={shift.id.toString()}>
-                        {shift.name} ({shift.start_time} - {shift.end_time})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <FormField
+              control={form.control}
+              name='shift_id'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Shift</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder='Select shift (optional)' />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value=''>No shift assigned</SelectItem>
+                      {shifts.map((shift) => (
+                        <SelectItem key={shift.id} value={shift.id.toString()}>
+                          {shift.name} ({shift.start_time} - {shift.end_time})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
             <DialogFooter>
               <Button type='submit' disabled={isPending}>

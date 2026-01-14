@@ -9,8 +9,7 @@ export function requireRole(allowed: Array<AuthUser['role']>) {
   const role = useAuthStore.getState().auth.user?.role
   if (!role || !allowed.includes(role)) {
     throw redirect({
-      to: '/_authenticated/errors/$error',
-      params: { error: 'forbidden' },
+      to: '/403',
     })
   }
 }

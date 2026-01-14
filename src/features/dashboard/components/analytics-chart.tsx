@@ -8,7 +8,6 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  type TooltipProps,
 } from 'recharts'
 import { useMessagesByDate } from '@/api/analytics'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -31,7 +30,12 @@ const parseDateSafe = (value: string | null | undefined): Date | null => {
   }
 }
 
-function ActivityTooltip({ active, payload }: TooltipProps<string, string>) {
+type ActivityTooltipProps = {
+  active?: boolean
+  payload?: Array<{ payload?: ChartPoint }>
+}
+
+function ActivityTooltip({ active, payload }: ActivityTooltipProps) {
   if (!active || !payload?.length) return null
   const dataPoint = payload[0]?.payload as ChartPoint | undefined
   if (!dataPoint) return null

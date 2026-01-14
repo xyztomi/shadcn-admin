@@ -12,6 +12,7 @@ import {
 } from '@/api/agents'
 import { useShifts } from '@/api/shifts'
 import { handleServerError } from '@/lib/handle-server-error'
+import { AgentDepartment, AgentRole } from '@/types'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -50,8 +51,8 @@ const agentFormSchema = z.object({
     }),
   full_name: z.string().min(1, 'Full name is required'),
   email: z.string().email().optional().or(z.literal('')),
-  department: z.enum(['viufinder', 'viufinder_xp']),
-  role: z.enum(['superuser', 'admin', 'agent']),
+  department: z.nativeEnum(AgentDepartment),
+  role: z.nativeEnum(AgentRole),
   shift_id: z.string().optional(),
 })
 
@@ -89,8 +90,8 @@ export function AgentsActionDialog() {
       password: '',
       full_name: '',
       email: '',
-      department: 'viufinder',
-      role: 'agent',
+      department: AgentDepartment.VIUFINDER,
+      role: AgentRole.AGENT,
       shift_id: '',
     },
   })
@@ -113,8 +114,8 @@ export function AgentsActionDialog() {
         password: '',
         full_name: '',
         email: '',
-        department: 'viufinder',
-        role: 'agent',
+        department: AgentDepartment.VIUFINDER,
+        role: AgentRole.AGENT,
         shift_id: '',
       })
     }
@@ -261,15 +262,18 @@ export function AgentsActionDialog() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Department</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      onValueChange={(value) => field.onChange(value as AgentDepartment)}
+                      value={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder='Select department' />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value='viufinder'>VIUFinder</SelectItem>
-                        <SelectItem value='viufinder_xp'>VF XP</SelectItem>
+                        <SelectItem value={AgentDepartment.VIUFINDER}>VIUFinder</SelectItem>
+                        <SelectItem value={AgentDepartment.VIUFINDER_XP}>VF XP</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -282,16 +286,19 @@ export function AgentsActionDialog() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Role</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      onValueChange={(value) => field.onChange(value as AgentRole)}
+                      value={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder='Select role' />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value='superuser'>Superuser</SelectItem>
-                        <SelectItem value='admin'>Admin</SelectItem>
-                        <SelectItem value='agent'>Agent</SelectItem>
+                        <SelectItem value={AgentRole.SUPERUSER}>Superuser</SelectItem>
+                        <SelectItem value={AgentRole.ADMIN}>Admin</SelectItem>
+                        <SelectItem value={AgentRole.AGENT}>Agent</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

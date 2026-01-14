@@ -26,9 +26,6 @@ export * from './analytics'
 // Shifts exports
 export * from './shifts'
 
-// Attendance exports
-export * from './attendance'
-
 // Templates exports
 export * from './templates'
 

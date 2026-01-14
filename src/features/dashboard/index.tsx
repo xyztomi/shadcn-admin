@@ -295,9 +295,13 @@ export function Dashboard() {
                         </div>
                         <div className='text-right text-xs text-muted-foreground'>
                           <p className='text-sm font-semibold'>
-                            {agent.resolved_today} resolved
+                            {(agent.resolved_today ?? 0).toLocaleString()} resolved
                           </p>
-                          <p>{Math.round(agent.avg_response_time / 60)}m avg</p>
+                          <p>
+                            {typeof agent.avg_response_time === 'number'
+                              ? `${Math.max(0, Math.round(agent.avg_response_time / 60))}m avg`
+                              : '—'}
+                          </p>
                         </div>
                       </div>
                     ))}

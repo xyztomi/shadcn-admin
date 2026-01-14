@@ -1,4 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
+import {
+  useState,
+  useEffect,
+  useRef,
+  type RefObject,
+  type MutableRefObject,
+} from 'react'
 import { Zap, Search, Loader2, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
@@ -20,7 +26,9 @@ import type { QuickReply } from '@/types'
 
 interface QuickReplyPickerProps {
   onSelect: (content: string) => void
-  inputRef?: React.RefObject<HTMLInputElement>
+  inputRef?:
+  | RefObject<HTMLInputElement | null>
+  | MutableRefObject<HTMLInputElement | null>
   className?: string
 }
 

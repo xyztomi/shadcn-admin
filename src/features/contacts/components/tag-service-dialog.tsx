@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
-import { useTagContact } from '@/api/contacts'
+import { useTagContact, ServiceTag } from '@/api/contacts'
 import { serviceTags } from '../data/schema'
 import { useContactsContext } from './contacts-provider'
 
@@ -30,12 +30,12 @@ export function TagServiceDialog() {
     setTimeout(() => setCurrentContact(null), 300)
   }
 
-  const handleTag = async (serviceTag: string) => {
+  const handleTag = async (serviceTag: ServiceTag) => {
     if (!currentContact) return
 
     await tagMutation.mutateAsync({
       waId: currentContact.wa_id,
-      serviceTag: serviceTag as 'viufinder' | 'viufinder_xp',
+      serviceTag,
     })
     toast.success('Service tag updated')
     handleClose()
@@ -54,7 +54,7 @@ export function TagServiceDialog() {
         </DialogHeader>
 
         <Select
-          onValueChange={handleTag}
+          onValueChange={(value) => handleTag(value as ServiceTag)}
           defaultValue={currentContact.service_tag || undefined}
         >
           <SelectTrigger>

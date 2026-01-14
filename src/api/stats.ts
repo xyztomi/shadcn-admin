@@ -14,6 +14,12 @@ export interface OverviewStats {
     online: number
     available: number
   }
+  total_contacts?: number
+  active_conversations?: number
+  messages_today?: number
+  unassigned_contacts?: number
+  online_agents?: number
+  avg_response_time?: number
 }
 
 export interface AgentStats {
@@ -24,6 +30,8 @@ export interface AgentStats {
   is_online: boolean
   is_available: boolean
   department_contacts: number
+  resolved_today?: number
+  avg_response_time?: number
 }
 
 export function useOverviewStats() {

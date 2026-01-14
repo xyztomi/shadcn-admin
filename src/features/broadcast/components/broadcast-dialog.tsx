@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Loader2 } from 'lucide-react'
@@ -73,8 +73,8 @@ export function BroadcastDialog({
     },
   })
 
-  const targetType = form.watch('target_type')
-  const selectedTagIds = form.watch('tag_ids')
+  const targetType = useWatch({ control: form.control, name: 'target_type' })
+  const selectedTagIds = useWatch({ control: form.control, name: 'tag_ids' }) ?? []
 
   useEffect(() => {
     if (broadcast) {

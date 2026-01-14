@@ -6,6 +6,12 @@ import { DataTableColumnHeader } from '@/components/data-table'
 import { type Contact } from '../data/schema'
 import { ContactsRowActions } from './contacts-row-actions'
 
+// Convert UTC date to Jakarta time (UTC+7)
+function toJakartaTime(date: Date): Date {
+  const JAKARTA_OFFSET_MS = 7 * 60 * 60 * 1000
+  return new Date(date.getTime() + JAKARTA_OFFSET_MS)
+}
+
 export const contactsColumns: ColumnDef<Contact>[] = [
   {
     id: 'select',
@@ -96,9 +102,10 @@ export const contactsColumns: ColumnDef<Contact>[] = [
     cell: ({ row }) => {
       const date = row.getValue('last_message_at') as string | null
       if (!date) return <span className='text-muted-foreground'>-</span>
+      const jakartaDate = toJakartaTime(new Date(date))
       return (
         <span className='text-sm'>
-          {format(new Date(date), 'MMM d, HH:mm')}
+          {format(jakartaDate, 'MMM d, HH:mm')}
         </span>
       )
     },

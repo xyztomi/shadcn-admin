@@ -110,8 +110,8 @@ export function AgentsTable({ data, search, navigate, isLoading }: DataTableProp
             columnId: 'role',
             title: 'Role',
             options: [
+              { label: 'Superuser', value: 'superuser' },
               { label: 'Admin', value: 'admin' },
-              { label: 'Manager', value: 'manager' },
               { label: 'Agent', value: 'agent' },
             ],
           },

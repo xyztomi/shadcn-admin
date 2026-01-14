@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { AxiosError } from 'axios'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
@@ -41,15 +42,36 @@ import { useAgentsContext } from './agents-provider'
 
 const agentFormSchema = z.object({
   username: z.string().min(3, 'Username must be at least 3 characters'),
-  password: z.string().optional(),
+  password: z
+    .string()
+    .optional()
+    .refine((val) => !val || val.length >= 6, {
+      message: 'Password must be at least 6 characters',
+    }),
   full_name: z.string().min(1, 'Full name is required'),
   email: z.string().email().optional().or(z.literal('')),
   department: z.enum(['viufinder', 'viufinder_xp']),
-  role: z.enum(['admin', 'manager', 'agent']),
+  role: z.enum(['superuser', 'admin', 'agent']),
   shift_id: z.string().optional(),
 })
 
 type AgentForm = z.infer<typeof agentFormSchema>
+
+const agentFormFields: Array<keyof AgentForm> = [
+  'username',
+  'password',
+  'full_name',
+  'email',
+  'department',
+  'role',
+  'shift_id',
+]
+
+const agentFormFieldSet = new Set(agentFormFields)
+
+function isAgentFormField(value: unknown): value is keyof AgentForm {
+  return typeof value === 'string' && agentFormFieldSet.has(value as keyof AgentForm)
+}
 
 export function AgentsActionDialog() {
   const { open, setOpen, currentRow, setCurrentRow } = useAgentsContext()
@@ -142,6 +164,19 @@ export function AgentsActionDialog() {
       }
       handleOpenChange(false)
     } catch (error) {
+      if (error instanceof AxiosError) {
+        const detail = error.response?.data?.detail
+        if (Array.isArray(detail)) {
+          detail.forEach((err: { loc?: unknown[]; msg?: string }) => {
+            const locField = Array.isArray(err?.loc) ? err.loc[1] : undefined
+            if (isAgentFormField(locField)) {
+              form.setError(locField, {
+                message: err?.msg ?? 'Invalid value',
+              })
+            }
+          })
+        }
+      }
       handleServerError(error)
     }
   }
@@ -254,8 +289,8 @@ export function AgentsActionDialog() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
+                        <SelectItem value='superuser'>Superuser</SelectItem>
                         <SelectItem value='admin'>Admin</SelectItem>
-                        <SelectItem value='manager'>Manager</SelectItem>
                         <SelectItem value='agent'>Agent</SelectItem>
                       </SelectContent>
                     </Select>
@@ -270,14 +305,17 @@ export function AgentsActionDialog() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Shift</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select
+                    onValueChange={(val) => field.onChange(val === '__none__' ? '' : val)}
+                    value={field.value || '__none__'}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder='Select shift (optional)' />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value=''>No shift assigned</SelectItem>
+                      <SelectItem value='__none__'>No shift assigned</SelectItem>
                       {shifts.map((shift) => (
                         <SelectItem key={shift.id} value={shift.id.toString()}>
                           {shift.name} ({shift.start_time} - {shift.end_time})

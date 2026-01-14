@@ -18,9 +18,9 @@ export function AgentsProvider({ children }: { children: React.ReactNode }) {
   const [currentRow, setCurrentRow] = useState<Agent | null>(null)
 
   return (
-    <AgentsContext value={{ open, setOpen, currentRow, setCurrentRow }}>
+    <AgentsContext.Provider value={{ open, setOpen, currentRow, setCurrentRow }}>
       {children}
-    </AgentsContext>
+    </AgentsContext.Provider>
   )
 }
 

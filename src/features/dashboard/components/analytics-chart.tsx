@@ -80,12 +80,12 @@ export function AnalyticsChart() {
   }, [messagesByDate])
 
   if (isLoading) {
-    return <Skeleton className='h-[300px] w-full' />
+    return <Skeleton className='h-75 w-full' />
   }
 
   if (chartData.length === 0) {
     return (
-      <div className='flex h-[300px] w-full items-center justify-center text-sm text-muted-foreground'>
+      <div className='flex h-75 w-full items-center justify-center text-sm text-muted-foreground'>
         No activity in the selected window.
       </div>
     )

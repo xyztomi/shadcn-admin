@@ -67,11 +67,14 @@ const getMessageSenderName = (
   return contact?.name || contact?.phone_number || msg.wa_id
 }
 
-function getInitials(name: string | null, phone: string): string {
+function getInitials(name: string | null | undefined, phone: string | undefined): string {
   if (name) {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
   }
-  return phone.slice(-2)
+  if (phone) {
+    return phone.slice(-2)
+  }
+  return '??'
 }
 
 // Convert UTC date to Jakarta time (UTC+7)
@@ -175,11 +178,10 @@ export function Chats() {
   }, {})
 
   // Filter contacts by search
-  const filteredContacts = contacts?.filter(contact =>
-    (contact.name || contact.phone_number)
-      .toLowerCase()
-      .includes(search.trim().toLowerCase())
-  ) ?? []
+  const filteredContacts = contacts?.filter(contact => {
+    const searchText = contact.name || contact.phone_number || ''
+    return searchText.toLowerCase().includes(search.trim().toLowerCase())
+  }) ?? []
 
   // Mark messages as read when selecting a contact
   useEffect(() => {

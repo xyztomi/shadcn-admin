@@ -124,6 +124,23 @@ export function useUpdateAgentStatus() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agents'] })
       queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
+      queryClient.invalidateQueries({ queryKey: ['stats', 'me'] })
+    },
+  })
+}
+
+// Update current agent's availability (convenience hook)
+export function useUpdateAvailability() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: { is_available: boolean }) => {
+      const response = await api.patch('/agents/me/status', data)
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agents'] })
+      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
+      queryClient.invalidateQueries({ queryKey: ['stats', 'me'] })
     },
   })
 }

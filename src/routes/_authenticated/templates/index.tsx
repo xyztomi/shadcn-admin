@@ -1,14 +1,8 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
-import { useAuthStore } from '@/stores/auth-store'
+import { createFileRoute } from '@tanstack/react-router'
 import { Templates } from '@/features/templates'
+import { requireRole } from '@/lib/require-role'
 
 export const Route = createFileRoute('/_authenticated/templates/')({
-  beforeLoad: () => {
-    const user = useAuthStore.getState().auth.user
-    // Only allow admin and superuser roles
-    if (user && user.role !== 'admin' && user.role !== 'superuser') {
-      throw redirect({ to: '/' })
-    }
-  },
+  beforeLoad: () => requireRole(['superuser', 'admin']),
   component: Templates,
 })

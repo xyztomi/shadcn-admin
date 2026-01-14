@@ -37,6 +37,7 @@ import { Route as AuthenticatedAgentsIndexRouteImport } from './routes/_authenti
 import { Route as ClerkAuthenticatedUserManagementRouteImport } from './routes/clerk/_authenticated/user-management'
 import { Route as ClerkauthSignUpRouteImport } from './routes/clerk/(auth)/sign-up'
 import { Route as ClerkauthSignInRouteImport } from './routes/clerk/(auth)/sign-in'
+import { Route as AuthenticatedSettingsWebhookRouteImport } from './routes/_authenticated/settings/webhook'
 import { Route as AuthenticatedSettingsTagsRouteImport } from './routes/_authenticated/settings/tags'
 import { Route as AuthenticatedSettingsQuickRepliesRouteImport } from './routes/_authenticated/settings/quick-replies'
 import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes/_authenticated/settings/notifications'
@@ -189,6 +190,12 @@ const ClerkauthSignInRoute = ClerkauthSignInRouteImport.update({
   path: '/sign-in',
   getParentRoute: () => ClerkauthRouteRoute,
 } as any)
+const AuthenticatedSettingsWebhookRoute =
+  AuthenticatedSettingsWebhookRouteImport.update({
+    id: '/webhook',
+    path: '/webhook',
+    getParentRoute: () => AuthenticatedSettingsRouteRoute,
+  } as any)
 const AuthenticatedSettingsTagsRoute =
   AuthenticatedSettingsTagsRouteImport.update({
     id: '/tags',
@@ -246,6 +253,7 @@ export interface FileRoutesByFullPath {
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/settings/quick-replies': typeof AuthenticatedSettingsQuickRepliesRoute
   '/settings/tags': typeof AuthenticatedSettingsTagsRoute
+  '/settings/webhook': typeof AuthenticatedSettingsWebhookRoute
   '/clerk/sign-in': typeof ClerkauthSignInRoute
   '/clerk/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/user-management': typeof ClerkAuthenticatedUserManagementRoute
@@ -278,6 +286,7 @@ export interface FileRoutesByTo {
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/settings/quick-replies': typeof AuthenticatedSettingsQuickRepliesRoute
   '/settings/tags': typeof AuthenticatedSettingsTagsRoute
+  '/settings/webhook': typeof AuthenticatedSettingsWebhookRoute
   '/clerk/sign-in': typeof ClerkauthSignInRoute
   '/clerk/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/user-management': typeof ClerkAuthenticatedUserManagementRoute
@@ -315,6 +324,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/_authenticated/settings/quick-replies': typeof AuthenticatedSettingsQuickRepliesRoute
   '/_authenticated/settings/tags': typeof AuthenticatedSettingsTagsRoute
+  '/_authenticated/settings/webhook': typeof AuthenticatedSettingsWebhookRoute
   '/clerk/(auth)/sign-in': typeof ClerkauthSignInRoute
   '/clerk/(auth)/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/_authenticated/user-management': typeof ClerkAuthenticatedUserManagementRoute
@@ -350,6 +360,7 @@ export interface FileRouteTypes {
     | '/settings/notifications'
     | '/settings/quick-replies'
     | '/settings/tags'
+    | '/settings/webhook'
     | '/clerk/sign-in'
     | '/clerk/sign-up'
     | '/clerk/user-management'
@@ -382,6 +393,7 @@ export interface FileRouteTypes {
     | '/settings/notifications'
     | '/settings/quick-replies'
     | '/settings/tags'
+    | '/settings/webhook'
     | '/clerk/sign-in'
     | '/clerk/sign-up'
     | '/clerk/user-management'
@@ -418,6 +430,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/notifications'
     | '/_authenticated/settings/quick-replies'
     | '/_authenticated/settings/tags'
+    | '/_authenticated/settings/webhook'
     | '/clerk/(auth)/sign-in'
     | '/clerk/(auth)/sign-up'
     | '/clerk/_authenticated/user-management'
@@ -645,6 +658,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClerkauthSignInRouteImport
       parentRoute: typeof ClerkauthRouteRoute
     }
+    '/_authenticated/settings/webhook': {
+      id: '/_authenticated/settings/webhook'
+      path: '/webhook'
+      fullPath: '/settings/webhook'
+      preLoaderRoute: typeof AuthenticatedSettingsWebhookRouteImport
+      parentRoute: typeof AuthenticatedSettingsRouteRoute
+    }
     '/_authenticated/settings/tags': {
       id: '/_authenticated/settings/tags'
       path: '/tags'
@@ -696,6 +716,7 @@ interface AuthenticatedSettingsRouteRouteChildren {
   AuthenticatedSettingsNotificationsRoute: typeof AuthenticatedSettingsNotificationsRoute
   AuthenticatedSettingsQuickRepliesRoute: typeof AuthenticatedSettingsQuickRepliesRoute
   AuthenticatedSettingsTagsRoute: typeof AuthenticatedSettingsTagsRoute
+  AuthenticatedSettingsWebhookRoute: typeof AuthenticatedSettingsWebhookRoute
   AuthenticatedSettingsIndexRoute: typeof AuthenticatedSettingsIndexRoute
 }
 
@@ -708,6 +729,7 @@ const AuthenticatedSettingsRouteRouteChildren: AuthenticatedSettingsRouteRouteCh
     AuthenticatedSettingsQuickRepliesRoute:
       AuthenticatedSettingsQuickRepliesRoute,
     AuthenticatedSettingsTagsRoute: AuthenticatedSettingsTagsRoute,
+    AuthenticatedSettingsWebhookRoute: AuthenticatedSettingsWebhookRoute,
     AuthenticatedSettingsIndexRoute: AuthenticatedSettingsIndexRoute,
   }
 

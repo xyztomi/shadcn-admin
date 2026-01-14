@@ -1,5 +1,5 @@
 import { Outlet } from '@tanstack/react-router'
-import { Monitor, Bell, Palette, Clock, Tags, Zap } from 'lucide-react'
+import { Monitor, Bell, Palette, Clock, Tags, Zap, Link2 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
@@ -24,6 +24,11 @@ const sidebarNavItems = [
     title: 'Quick Replies',
     href: '/settings/quick-replies',
     icon: <Zap size={18} />,
+  },
+  {
+    title: 'Webhook',
+    href: '/settings/webhook',
+    icon: <Link2 size={18} />,
   },
   {
     title: 'Appearance',

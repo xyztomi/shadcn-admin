@@ -40,3 +40,6 @@ export * from './quick-replies'
 
 // Broadcast exports
 export * from './broadcast'
+
+// Settings exports
+export * from './settings'

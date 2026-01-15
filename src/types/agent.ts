@@ -9,17 +9,11 @@ export enum AgentDepartment {
   VIUFINDER_XP = 'viufinder_xp',
 }
 
-export enum AgentCity {
-  JAKARTA = 'jakarta',
-  BANDUNG = 'bandung',
-  SURABAYA = 'surabaya',
-  MEDAN = 'medan',
-  SEMARANG = 'semarang',
-  MAKASSAR = 'makassar',
-  PALEMBANG = 'palembang',
-  TANGERANG = 'tangerang',
-  DEPOK = 'depok',
-  BEKASI = 'bekasi',
+export enum AgentBooth {
+  KING_PADEL_KEMANG = 'king_padel_kemang',
+  KYZN_KUNINGAN = 'kyzn_kuningan',
+  MR_PADEL_CIPETE = 'mr_padel_cipete',
+  OTHER = 'other',
   ALL = 'all',
 }
 
@@ -29,7 +23,7 @@ export interface Agent {
   full_name: string
   role: AgentRole
   department: AgentDepartment
-  city: AgentCity
+  booth: AgentBooth
   is_online: boolean
   is_available: boolean
   is_active: boolean

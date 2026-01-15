@@ -81,27 +81,20 @@ export const contactsColumns: ColumnDef<Contact>[] = [
     },
   },
   {
-    accessorKey: 'city_tag',
+    accessorKey: 'booth_tag',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='City' />
+      <DataTableColumnHeader column={column} title='Booth' />
     ),
     cell: ({ row }) => {
-      const city = row.getValue('city_tag') as string | null
-      if (!city) return <span className='text-muted-foreground'>-</span>
-      const cityLabels: Record<string, string> = {
-        jakarta: 'Jakarta',
-        bandung: 'Bandung',
-        surabaya: 'Surabaya',
-        medan: 'Medan',
-        semarang: 'Semarang',
-        makassar: 'Makassar',
-        palembang: 'Palembang',
-        tangerang: 'Tangerang',
-        depok: 'Depok',
-        bekasi: 'Bekasi',
-        other: 'Lainnya',
+      const booth = row.getValue('booth_tag') as string | null
+      if (!booth) return <span className='text-muted-foreground'>-</span>
+      const boothLabels: Record<string, string> = {
+        king_padel_kemang: 'King Padel Kemang',
+        kyzn_kuningan: 'KYZN Kuningan',
+        mr_padel_cipete: 'Mr Padel Cipete',
+        other: 'Other',
       }
-      return <span className='text-sm'>{cityLabels[city] || city}</span>
+      return <span className='text-sm'>{boothLabels[booth] || booth}</span>
     },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))

@@ -69,7 +69,7 @@ export function useUpdateContact() {
       data: Partial<
         Pick<
           Contact,
-          'name' | 'notes' | 'is_active' | 'service_tag' | 'city_tag'
+          'name' | 'notes' | 'is_active' | 'service_tag' | 'booth_tag'
         >
       >
     }) => {

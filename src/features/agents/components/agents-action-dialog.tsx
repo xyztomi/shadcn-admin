@@ -12,7 +12,7 @@ import {
 } from '@/api/agents'
 import { useShifts } from '@/api/shifts'
 import { handleServerError } from '@/lib/handle-server-error'
-import { AgentDepartment, AgentRole, AgentCity } from '@/types'
+import { AgentDepartment, AgentRole, AgentBooth } from '@/types'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -51,7 +51,7 @@ const agentFormSchema = z.object({
     }),
   full_name: z.string().min(1, 'Full name is required'),
   department: z.nativeEnum(AgentDepartment),
-  city: z.nativeEnum(AgentCity),
+  booth: z.nativeEnum(AgentBooth),
   role: z.nativeEnum(AgentRole),
   shift_id: z.string().optional(),
 })
@@ -63,7 +63,7 @@ const agentFormFields: Array<keyof AgentForm> = [
   'password',
   'full_name',
   'department',
-  'city',
+  'booth',
   'role',
   'shift_id',
 ]
@@ -90,7 +90,7 @@ export function AgentsActionDialog() {
       password: '',
       full_name: '',
       department: AgentDepartment.VIUFINDER,
-      city: AgentCity.ALL,
+      booth: AgentBooth.ALL,
       role: AgentRole.AGENT,
       shift_id: '',
     },
@@ -103,7 +103,7 @@ export function AgentsActionDialog() {
         username: currentRow.username,
         full_name: currentRow.full_name,
         department: currentRow.department,
-        city: currentRow.city || AgentCity.ALL,
+        booth: currentRow.booth || AgentBooth.ALL,
         role: currentRow.role,
         password: '',
         shift_id: currentRow.shift_id?.toString() || '',
@@ -114,7 +114,7 @@ export function AgentsActionDialog() {
         password: '',
         full_name: '',
         department: AgentDepartment.VIUFINDER,
-        city: AgentCity.ALL,
+        booth: AgentBooth.ALL,
         role: AgentRole.AGENT,
         shift_id: '',
       })
@@ -137,7 +137,7 @@ export function AgentsActionDialog() {
         const payload: UpdateAgentPayload = {
           full_name: data.full_name,
           department: data.department,
-          city: data.city,
+          booth: data.booth,
           role: data.role,
           shift_id: shiftId,
         }
@@ -156,7 +156,7 @@ export function AgentsActionDialog() {
           password: data.password,
           full_name: data.full_name,
           department: data.department,
-          city: data.city,
+          booth: data.booth,
           role: data.role,
           shift_id: shiftId,
         }
@@ -295,31 +295,25 @@ export function AgentsActionDialog() {
             </div>
             <FormField
               control={form.control}
-              name='city'
+              name='booth'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>City Assignment</FormLabel>
+                  <FormLabel>Booth Assignment</FormLabel>
                   <Select
-                    onValueChange={(value) => field.onChange(value as AgentCity)}
+                    onValueChange={(value) => field.onChange(value as AgentBooth)}
                     value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder='Select city' />
+                        <SelectValue placeholder='Select booth' />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value={AgentCity.ALL}>All Cities</SelectItem>
-                      <SelectItem value={AgentCity.JAKARTA}>Jakarta</SelectItem>
-                      <SelectItem value={AgentCity.BANDUNG}>Bandung</SelectItem>
-                      <SelectItem value={AgentCity.SURABAYA}>Surabaya</SelectItem>
-                      <SelectItem value={AgentCity.MEDAN}>Medan</SelectItem>
-                      <SelectItem value={AgentCity.SEMARANG}>Semarang</SelectItem>
-                      <SelectItem value={AgentCity.MAKASSAR}>Makassar</SelectItem>
-                      <SelectItem value={AgentCity.PALEMBANG}>Palembang</SelectItem>
-                      <SelectItem value={AgentCity.TANGERANG}>Tangerang</SelectItem>
-                      <SelectItem value={AgentCity.DEPOK}>Depok</SelectItem>
-                      <SelectItem value={AgentCity.BEKASI}>Bekasi</SelectItem>
+                      <SelectItem value={AgentBooth.ALL}>All Booths</SelectItem>
+                      <SelectItem value={AgentBooth.KING_PADEL_KEMANG}>King Padel Kemang</SelectItem>
+                      <SelectItem value={AgentBooth.KYZN_KUNINGAN}>KYZN Kuningan</SelectItem>
+                      <SelectItem value={AgentBooth.MR_PADEL_CIPETE}>Mr Padel Cipete</SelectItem>
+                      <SelectItem value={AgentBooth.OTHER}>Other</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

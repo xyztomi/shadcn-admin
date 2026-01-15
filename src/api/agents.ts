@@ -4,18 +4,18 @@ import {
   type Contact,
   AgentRole,
   AgentDepartment,
-  AgentCity,
+  AgentBooth,
 } from '@/types'
 import { useDepartmentStore } from '@/stores/department-store'
 import { api } from './client'
 
 // Re-export for convenience
 export type { Agent }
-export { AgentRole, AgentDepartment, AgentCity }
+export { AgentRole, AgentDepartment, AgentBooth }
 
 export interface AgentFilters {
   department?: AgentDepartment
-  city?: AgentCity
+  booth?: AgentBooth
   is_available?: boolean
   is_online?: boolean
   shift_id?: number
@@ -27,7 +27,7 @@ export interface CreateAgentPayload {
   full_name: string
   role: AgentRole
   department: AgentDepartment
-  city?: AgentCity
+  booth?: AgentBooth
   shift_id?: number | null
 }
 
@@ -36,7 +36,7 @@ export interface UpdateAgentPayload {
   password?: string
   role?: AgentRole
   department?: AgentDepartment
-  city?: AgentCity
+  booth?: AgentBooth
   shift_id?: number | null
 }
 

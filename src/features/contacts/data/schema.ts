@@ -3,27 +3,20 @@ import { z } from 'zod'
 export const serviceTagSchema = z.enum(['viufinder', 'viufinder_xp'])
 export type ServiceTag = z.infer<typeof serviceTagSchema>
 
-export const cityTagSchema = z.enum([
-  'jakarta',
-  'bandung',
-  'surabaya',
-  'medan',
-  'semarang',
-  'makassar',
-  'palembang',
-  'tangerang',
-  'depok',
-  'bekasi',
+export const boothTagSchema = z.enum([
+  'king_padel_kemang',
+  'kyzn_kuningan',
+  'mr_padel_cipete',
   'other',
 ])
-export type CityTag = z.infer<typeof cityTagSchema>
+export type BoothTag = z.infer<typeof boothTagSchema>
 
 export const contactSchema = z.object({
   wa_id: z.string(),
   name: z.string().nullable(),
   phone_number: z.string(),
   service_tag: serviceTagSchema.nullable(),
-  city_tag: cityTagSchema.nullable(),
+  booth_tag: boothTagSchema.nullable(),
   is_active: z.boolean(),
   notes: z.string().nullable(),
   last_message_at: z.string().nullable(),
@@ -39,16 +32,9 @@ export const serviceTags = [
   { value: 'viufinder_xp', label: 'VIU Finder XP' },
 ] as const
 
-export const cityTags = [
-  { value: 'jakarta', label: 'Jakarta' },
-  { value: 'bandung', label: 'Bandung' },
-  { value: 'surabaya', label: 'Surabaya' },
-  { value: 'medan', label: 'Medan' },
-  { value: 'semarang', label: 'Semarang' },
-  { value: 'makassar', label: 'Makassar' },
-  { value: 'palembang', label: 'Palembang' },
-  { value: 'tangerang', label: 'Tangerang' },
-  { value: 'depok', label: 'Depok' },
-  { value: 'bekasi', label: 'Bekasi' },
-  { value: 'other', label: 'Lainnya' },
+export const boothTags = [
+  { value: 'king_padel_kemang', label: 'King Padel Kemang' },
+  { value: 'kyzn_kuningan', label: 'KYZN Kuningan' },
+  { value: 'mr_padel_cipete', label: 'Mr Padel Cipete' },
+  { value: 'other', label: 'Other' },
 ] as const

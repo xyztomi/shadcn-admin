@@ -31,15 +31,15 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import { useUpdateContact } from '@/api/contacts'
-import type { ServiceTag, CityTag } from '@/types/contact'
-import { serviceTags, cityTags } from '../data/schema'
+import type { ServiceTag, BoothTag } from '@/types/contact'
+import { serviceTags, boothTags } from '../data/schema'
 import { useContactsContext } from './contacts-provider'
 
 const editContactSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   notes: z.string().optional(),
   service_tag: z.string().optional(),
-  city_tag: z.string().optional(),
+  booth_tag: z.string().optional(),
   is_active: z.boolean(),
 })
 
@@ -57,7 +57,7 @@ export function EditContactDialog() {
       name: '',
       notes: '',
       service_tag: '',
-      city_tag: '',
+      booth_tag: '',
       is_active: true,
     },
   })
@@ -69,7 +69,7 @@ export function EditContactDialog() {
         name: currentContact.name || '',
         notes: currentContact.notes || '',
         service_tag: currentContact.service_tag || '',
-        city_tag: currentContact.city_tag || '',
+        booth_tag: currentContact.booth_tag || '',
         is_active: currentContact.is_active ?? true,
       })
     }
@@ -90,7 +90,7 @@ export function EditContactDialog() {
           name: data.name,
           notes: data.notes || null,
           service_tag: (data.service_tag || null) as ServiceTag | null,
-          city_tag: (data.city_tag || null) as CityTag | null,
+          booth_tag: (data.booth_tag || null) as BoothTag | null,
           is_active: data.is_active,
         },
       })
@@ -175,22 +175,22 @@ export function EditContactDialog() {
               />
               <FormField
                 control={form.control}
-                name='city_tag'
+                name='booth_tag'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>City</FormLabel>
+                    <FormLabel>Booth</FormLabel>
                     <Select
                       onValueChange={(val) => field.onChange(val === '__none__' ? '' : val)}
                       value={field.value || '__none__'}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder='Select city' />
+                          <SelectValue placeholder='Select booth' />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value='__none__'>No city</SelectItem>
-                        {cityTags.map((tag) => (
+                        <SelectItem value='__none__'>No booth</SelectItem>
+                        {boothTags.map((tag) => (
                           <SelectItem key={tag.value} value={tag.value}>
                             {tag.label}
                           </SelectItem>

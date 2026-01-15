@@ -22,17 +22,11 @@ export const shiftColors: Record<string, string> = {
   noon: 'bg-sky-100/30 text-sky-900 dark:text-sky-200 border-sky-200',
 }
 
-export const cityColors: Record<string, string> = {
-  jakarta: 'bg-rose-100/30 text-rose-900 dark:text-rose-200 border-rose-200',
-  bandung: 'bg-amber-100/30 text-amber-900 dark:text-amber-200 border-amber-200',
-  surabaya: 'bg-lime-100/30 text-lime-900 dark:text-lime-200 border-lime-200',
-  medan: 'bg-emerald-100/30 text-emerald-900 dark:text-emerald-200 border-emerald-200',
-  semarang: 'bg-cyan-100/30 text-cyan-900 dark:text-cyan-200 border-cyan-200',
-  makassar: 'bg-indigo-100/30 text-indigo-900 dark:text-indigo-200 border-indigo-200',
-  palembang: 'bg-fuchsia-100/30 text-fuchsia-900 dark:text-fuchsia-200 border-fuchsia-200',
-  tangerang: 'bg-pink-100/30 text-pink-900 dark:text-pink-200 border-pink-200',
-  depok: 'bg-yellow-100/30 text-yellow-900 dark:text-yellow-200 border-yellow-200',
-  bekasi: 'bg-orange-100/30 text-orange-900 dark:text-orange-200 border-orange-200',
+export const boothColors: Record<string, string> = {
+  king_padel_kemang: 'bg-rose-100/30 text-rose-900 dark:text-rose-200 border-rose-200',
+  kyzn_kuningan: 'bg-amber-100/30 text-amber-900 dark:text-amber-200 border-amber-200',
+  mr_padel_cipete: 'bg-lime-100/30 text-lime-900 dark:text-lime-200 border-lime-200',
+  other: 'bg-cyan-100/30 text-cyan-900 dark:text-cyan-200 border-cyan-200',
   all: 'bg-gray-100/30 text-gray-900 dark:text-gray-200 border-gray-200',
 }
 
@@ -125,16 +119,23 @@ export const agentsColumns: ColumnDef<Agent>[] = [
     },
   },
   {
-    accessorKey: 'city',
+    accessorKey: 'booth',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='City' />
+      <DataTableColumnHeader column={column} title='Booth' />
     ),
     cell: ({ row }) => {
-      const city = row.getValue<string>('city')
-      const badgeColor = cityColors[city] ?? ''
+      const booth = row.getValue<string>('booth')
+      const badgeColor = boothColors[booth] ?? ''
+      const boothLabels: Record<string, string> = {
+        king_padel_kemang: 'King Padel Kemang',
+        kyzn_kuningan: 'KYZN Kuningan',
+        mr_padel_cipete: 'Mr Padel Cipete',
+        other: 'Other',
+        all: 'All Booths',
+      }
       return (
         <Badge variant='outline' className={cn('capitalize', badgeColor)}>
-          {city === 'all' ? 'All Cities' : city}
+          {boothLabels[booth] || booth}
         </Badge>
       )
     },

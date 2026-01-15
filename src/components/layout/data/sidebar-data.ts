@@ -1,12 +1,12 @@
 import {
   // Construction,
   LayoutDashboard,
-  Monitor,
+  // Monitor,
   // Bug,
   // ListTodo,
   // FileX,
-  FileText,
-  HelpCircle,
+  // FileText,
+  // HelpCircle,
   // Lock,
   Bell,
   Palette,
@@ -21,6 +21,7 @@ import {
   Clock,
   Tag,
   Zap,
+  Bot,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -38,11 +39,7 @@ export const sidebarData: SidebarData = {
           url: '/',
           icon: LayoutDashboard,
         },
-        {
-          title: 'Contacts',
-          url: '/contacts',
-          icon: Contact,
-        },
+
         {
           title: 'Chats',
           url: '/chats',
@@ -72,9 +69,20 @@ export const sidebarData: SidebarData = {
           roles: ['superuser', 'admin', 'manager'],
         },
         {
-          title: 'Templates',
-          url: '/templates',
-          icon: FileText,
+          title: 'Contacts',
+          url: '/contacts',
+          icon: Contact,
+        },
+        {
+          title: 'Interactive Message',
+          url: '/interactive-message',
+          icon: Zap,
+          roles: ['superuser', 'admin'],
+        },
+        {
+          title: 'Bot Handlers',
+          url: '/bot-handlers',
+          icon: Bot,
           roles: ['superuser', 'admin'],
         },
       ],
@@ -174,18 +182,13 @@ export const sidebarData: SidebarData = {
               url: '/settings/notifications',
               icon: Bell,
             },
-            {
-              title: 'Display',
-              url: '/settings/display',
-              icon: Monitor,
-            },
           ],
         },
-        {
-          title: 'Help Center',
-          url: '/help-center',
-          icon: HelpCircle,
-        },
+        // {
+        //   title: 'Help Center',
+        //   url: '/help-center',
+        //   icon: HelpCircle,
+        // },
       ],
     },
   ],

@@ -22,17 +22,17 @@ const departmentConfig: Record<
   { name: string; logo: React.ElementType; plan: string }
 > = {
   all: {
-    name: 'WA CRM',
+    name: 'All Departments',
     logo: Command,
-    plan: 'All Departments',
+    plan: '',
   },
   viufinder: {
-    name: 'VIU Finder',
+    name: 'VIUFinder',
     logo: GalleryVerticalEnd,
     plan: 'Department',
   },
   viufinder_xp: {
-    name: 'VIU Finder XP',
+    name: 'VIUFinder XP',
     logo: AudioWaveform,
     plan: 'Department',
   },

@@ -19,7 +19,6 @@ export interface RegisterPayload {
   username: string
   password: string
   full_name: string
-  email?: string
   role: AgentRole
   department: AgentDepartment
 }
@@ -67,7 +66,7 @@ export function useCurrentAgent() {
 export function useUpdateProfile() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (data: Partial<Pick<Agent, 'full_name' | 'email'>>) => {
+    mutationFn: async (data: Partial<Pick<Agent, 'full_name'>>) => {
       const response = await api.patch('/auth/me', data)
       return response.data
     },

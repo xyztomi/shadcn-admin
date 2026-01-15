@@ -7,7 +7,6 @@ const ACCESS_TOKEN = 'wa_crm_token'
 export interface AuthUser {
   id: number
   username: string
-  email: string
   full_name: string
   role: 'superuser' | 'admin' | 'agent'
   department: 'viufinder' | 'viufinder_xp'

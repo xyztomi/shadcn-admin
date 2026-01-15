@@ -50,7 +50,6 @@ const agentFormSchema = z.object({
       message: 'Password must be at least 6 characters',
     }),
   full_name: z.string().min(1, 'Full name is required'),
-  email: z.string().email().optional().or(z.literal('')),
   department: z.nativeEnum(AgentDepartment),
   city: z.nativeEnum(AgentCity),
   role: z.nativeEnum(AgentRole),
@@ -63,7 +62,6 @@ const agentFormFields: Array<keyof AgentForm> = [
   'username',
   'password',
   'full_name',
-  'email',
   'department',
   'city',
   'role',
@@ -91,7 +89,6 @@ export function AgentsActionDialog() {
       username: '',
       password: '',
       full_name: '',
-      email: '',
       department: AgentDepartment.VIUFINDER,
       city: AgentCity.ALL,
       role: AgentRole.AGENT,
@@ -105,7 +102,6 @@ export function AgentsActionDialog() {
       form.reset({
         username: currentRow.username,
         full_name: currentRow.full_name,
-        email: currentRow.email || '',
         department: currentRow.department,
         city: currentRow.city || AgentCity.ALL,
         role: currentRow.role,
@@ -117,7 +113,6 @@ export function AgentsActionDialog() {
         username: '',
         password: '',
         full_name: '',
-        email: '',
         department: AgentDepartment.VIUFINDER,
         city: AgentCity.ALL,
         role: AgentRole.AGENT,
@@ -141,7 +136,6 @@ export function AgentsActionDialog() {
       if (isEdit && currentRow) {
         const payload: UpdateAgentPayload = {
           full_name: data.full_name,
-          email: data.email || undefined,
           department: data.department,
           city: data.city,
           role: data.role,
@@ -161,7 +155,6 @@ export function AgentsActionDialog() {
           username: data.username,
           password: data.password,
           full_name: data.full_name,
-          email: data.email || undefined,
           department: data.department,
           city: data.city,
           role: data.role,
@@ -244,19 +237,6 @@ export function AgentsActionDialog() {
                   <FormLabel>Full Name</FormLabel>
                   <FormControl>
                     <Input placeholder='John Doe' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='email'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email (optional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder='john@example.com' type='email' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

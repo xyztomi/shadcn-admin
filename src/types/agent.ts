@@ -26,7 +26,6 @@ export enum AgentCity {
 export interface Agent {
   id: number
   username: string
-  email: string | null
   full_name: string
   role: AgentRole
   department: AgentDepartment

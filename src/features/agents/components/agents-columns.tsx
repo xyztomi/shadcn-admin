@@ -89,15 +89,6 @@ export const agentsColumns: ColumnDef<Agent>[] = [
     meta: { className: 'w-36' },
   },
   {
-    accessorKey: 'email',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Email' />
-    ),
-    cell: ({ row }) => (
-      <div className='w-fit text-nowrap'>{row.getValue('email') || '-'}</div>
-    ),
-  },
-  {
     accessorKey: 'department',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Department' />

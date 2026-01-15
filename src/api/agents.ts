@@ -25,7 +25,6 @@ export interface CreateAgentPayload {
   username: string
   password: string
   full_name: string
-  email?: string
   role: AgentRole
   department: AgentDepartment
   city?: AgentCity
@@ -34,7 +33,6 @@ export interface CreateAgentPayload {
 
 export interface UpdateAgentPayload {
   full_name?: string
-  email?: string
   password?: string
   role?: AgentRole
   department?: AgentDepartment

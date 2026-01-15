@@ -46,7 +46,7 @@ export function NavUser() {
   }
 
   const displayName = user?.full_name || user?.username || 'User'
-  const displayEmail = user?.email || 'No email'
+  const displayUsername = user?.username || 'user'
 
   return (
     <>
@@ -66,7 +66,7 @@ export function NavUser() {
                 </Avatar>
                 <div className='grid flex-1 text-start text-sm leading-tight'>
                   <span className='truncate font-semibold'>{displayName}</span>
-                  <span className='truncate text-xs'>{displayEmail}</span>
+                  <span className='truncate text-xs'>@{displayUsername}</span>
                 </div>
                 <ChevronsUpDown className='ms-auto size-4' />
               </SidebarMenuButton>
@@ -87,7 +87,7 @@ export function NavUser() {
                   </Avatar>
                   <div className='grid flex-1 text-start text-sm leading-tight'>
                     <span className='truncate font-semibold'>{displayName}</span>
-                    <span className='truncate text-xs'>{displayEmail}</span>
+                    <span className='truncate text-xs'>@{displayUsername}</span>
                   </div>
                 </div>
               </DropdownMenuLabel>

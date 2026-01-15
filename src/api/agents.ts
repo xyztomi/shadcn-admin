@@ -152,6 +152,32 @@ export function useUpdateAvailability() {
   })
 }
 
+// Shift status types
+export interface ShiftStatus {
+  agent_id: number
+  shift: {
+    id: number
+    name: string
+    start_time: string
+    end_time: string
+    is_active: boolean
+  } | null
+  is_in_shift: boolean
+  can_send_messages: boolean
+}
+
+// Get current agent's shift status
+export function useMyShiftStatus() {
+  return useQuery({
+    queryKey: ['agents', 'me', 'shift-status'],
+    queryFn: async (): Promise<ShiftStatus> => {
+      const response = await api.get('/agents/me/shift-status')
+      return response.data
+    },
+    refetchInterval: 60 * 1000, // Refresh every minute
+  })
+}
+
 // Delete agent (admin only)
 export function useDeleteAgent() {
   const queryClient = useQueryClient()

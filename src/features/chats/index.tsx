@@ -10,13 +10,15 @@ import {
   Loader2,
   Radio,
   Trash2,
+  Clock,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { useContacts, type Contact } from '@/api/contacts'
-import { useAgents, type Agent } from '@/api/agents'
+import { useAgents, useMyShiftStatus, type Agent } from '@/api/agents'
 import { useConversation, useSendMessage, useMarkAsRead, useDeleteChat, type Message } from '@/api/chat'
 import { useWebSocket } from '@/hooks/use-websocket'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -123,6 +125,10 @@ export function Chats() {
   const messageInputRef = useRef<HTMLInputElement>(null)
   const currentUser = useAuthStore((state) => state.auth.user)
   const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'superuser'
+
+  // Fetch shift status
+  const { data: shiftStatus } = useMyShiftStatus()
+  const canSendMessages = shiftStatus?.can_send_messages ?? true
 
   // Fetch contacts for the chat list
   const { data: contacts, isLoading: contactsLoading } = useContacts()
@@ -507,27 +513,42 @@ export function Chats() {
                   </div>
                 </div>
 
+                {/* Shift Warning */}
+                {!canSendMessages && shiftStatus?.shift && (
+                  <Alert variant='destructive' className='mb-2'>
+                    <Clock className='h-4 w-4' />
+                    <AlertDescription>
+                      You are outside your shift hours ({shiftStatus.shift.start_time} - {shiftStatus.shift.end_time}).
+                      Message sending is disabled.
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                 {/* Message Input */}
                 <form onSubmit={handleSendMessage} className='flex w-full flex-none gap-2'>
-                  <div className='flex flex-1 items-center gap-2 rounded-md border border-input bg-card px-2 py-1 focus-within:ring-1 focus-within:ring-ring'>
+                  <div className={cn(
+                    'flex flex-1 items-center gap-2 rounded-md border border-input bg-card px-2 py-1 focus-within:ring-1 focus-within:ring-ring',
+                    !canSendMessages && 'opacity-50 cursor-not-allowed'
+                  )}>
                     <QuickReplyPicker
                       onSelect={(content) => setMessageText(content)}
                       inputRef={messageInputRef}
+                      disabled={!canSendMessages}
                     />
                     <input
                       ref={messageInputRef}
                       type='text'
-                      placeholder='Type your message... (/ for quick replies)'
-                      className='h-8 w-full flex-1 bg-inherit focus-visible:outline-hidden'
+                      placeholder={canSendMessages ? 'Type your message... (/ for quick replies)' : 'Messaging disabled outside shift hours'}
+                      className='h-8 w-full flex-1 bg-inherit focus-visible:outline-hidden disabled:cursor-not-allowed'
                       value={messageText}
                       onChange={(e) => setMessageText(e.target.value)}
-                      disabled={sendMutation.isPending}
+                      disabled={sendMutation.isPending || !canSendMessages}
                     />
                     <Button
                       type='submit'
                       variant='ghost'
                       size='icon'
-                      disabled={!messageText.trim() || sendMutation.isPending}
+                      disabled={!messageText.trim() || sendMutation.isPending || !canSendMessages}
                     >
                       {sendMutation.isPending ? (
                         <Loader2 className='h-5 w-5 animate-spin' />

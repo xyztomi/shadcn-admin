@@ -4,6 +4,7 @@ import {
   Clock,
   AlertCircle,
   Headphones,
+  CalendarClock,
 } from 'lucide-react'
 import {
   Card,
@@ -14,6 +15,7 @@ import {
 } from '@/components/ui/card'
 import { format, parseISO } from 'date-fns'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
@@ -125,6 +127,7 @@ export function AdminDashboard() {
 
   const onlineAgents = agentStats?.filter((a) => a.is_online).length ?? 0
   const availableAgents = agentStats?.filter((a) => a.is_available).length ?? 0
+  const inShiftAgents = agentStats?.filter((a) => a.is_in_shift).length ?? stats?.agents.in_shift ?? 0
   const contactsTotal = analyticsOverview?.contacts.total ?? stats?.total_contacts ?? 0
   const newContactsToday = analyticsOverview?.contacts.new_today ?? 0
   const activeConversations = analyticsOverview?.conversations.active ?? stats?.active_conversations ?? 0
@@ -213,7 +216,7 @@ export function AdminDashboard() {
               <StatCard
                 title='Agents Online'
                 value={formatNumber(agentsOnlineTotal)}
-                description={`${formatNumber(agentsAvailableTotal)} available`}
+                description={`${formatNumber(agentsAvailableTotal)} available · ${formatNumber(inShiftAgents)} in shift`}
                 icon={Headphones}
                 isLoading={statsLoading || analyticsLoading}
               />
@@ -312,13 +315,36 @@ export function AdminDashboard() {
                         key={agent.id}
                         className='flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3'
                       >
-                        <div>
-                          <p className='text-sm font-semibold'>
-                            {agent.full_name || agent.username}
-                          </p>
-                          <p className='text-xs text-muted-foreground'>
-                            {agent.department === 'viufinder_xp' ? 'Viufinder XP' : 'Viufinder'}
-                          </p>
+                        <div className='flex items-center gap-3'>
+                          <div>
+                            <div className='flex items-center gap-2'>
+                              <p className='text-sm font-semibold'>
+                                {agent.full_name || agent.username}
+                              </p>
+                              {agent.is_online ? (
+                                <Badge variant='default' className='text-[10px] px-1.5 py-0'>Online</Badge>
+                              ) : (
+                                <Badge variant='secondary' className='text-[10px] px-1.5 py-0'>Offline</Badge>
+                              )}
+                              {agent.shift && (
+                                <Badge
+                                  variant={agent.is_in_shift ? 'outline' : 'destructive'}
+                                  className='text-[10px] px-1.5 py-0'
+                                >
+                                  <CalendarClock className='mr-1 h-3 w-3' />
+                                  {agent.is_in_shift ? agent.shift.name : 'Out of shift'}
+                                </Badge>
+                              )}
+                            </div>
+                            <p className='text-xs text-muted-foreground'>
+                              {agent.department === 'viufinder_xp' ? 'Viufinder XP' : 'Viufinder'}
+                              {agent.shift && !agent.is_in_shift && (
+                                <span className='ml-2 text-destructive'>
+                                  ({agent.shift.start_time} - {agent.shift.end_time})
+                                </span>
+                              )}
+                            </p>
+                          </div>
                         </div>
                         <div className='text-right text-xs text-muted-foreground'>
                           <p className='text-sm font-semibold'>

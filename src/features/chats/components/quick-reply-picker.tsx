@@ -30,12 +30,14 @@ interface QuickReplyPickerProps {
   | RefObject<HTMLInputElement | null>
   | MutableRefObject<HTMLInputElement | null>
   className?: string
+  disabled?: boolean
 }
 
 export function QuickReplyPicker({
   onSelect,
   inputRef,
   className,
+  disabled = false,
 }: QuickReplyPickerProps) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
@@ -59,7 +61,7 @@ export function QuickReplyPicker({
   // Listen for "/" shortcut in the main input
   useEffect(() => {
     const input = inputRef?.current
-    if (!input) return
+    if (!input || disabled) return
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === '/' && input.value === '') {
@@ -70,7 +72,7 @@ export function QuickReplyPicker({
 
     input.addEventListener('keydown', handleKeyDown)
     return () => input.removeEventListener('keydown', handleKeyDown)
-  }, [inputRef])
+  }, [inputRef, disabled])
 
   const handleSelect = (reply: QuickReply) => {
     onSelect(reply.content)
@@ -88,7 +90,7 @@ export function QuickReplyPicker({
   )
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={(v) => !disabled && setOpen(v)}>
       <PopoverTrigger asChild>
         <Button
           type='button'
@@ -96,6 +98,7 @@ export function QuickReplyPicker({
           size='icon'
           className={cn('h-8 w-8', className)}
           title='Quick replies (press / in empty input)'
+          disabled={disabled}
         >
           <Zap className='h-4 w-4' />
         </Button>

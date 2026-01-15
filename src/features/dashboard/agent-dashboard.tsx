@@ -9,6 +9,7 @@ import {
   AlertCircle,
   ArrowRight,
   CalendarClock,
+  AlertTriangle,
 } from 'lucide-react'
 import {
   Card,
@@ -17,6 +18,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
@@ -172,6 +174,18 @@ export function AgentDashboard() {
               </Card>
             </div>
           </div>
+
+          {/* Out of Shift Warning */}
+          {!isInShift && stats?.shift && (
+            <Alert variant='destructive'>
+              <AlertTriangle className='h-4 w-4' />
+              <AlertTitle>You are outside your shift hours</AlertTitle>
+              <AlertDescription>
+                Your shift ({stats.shift.name}) is from {stats.shift.start_time} to {stats.shift.end_time}.
+                Message sending is disabled until your shift begins.
+              </AlertDescription>
+            </Alert>
+          )}
 
           {/* Today's Stats */}
           <div>

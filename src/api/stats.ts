@@ -13,6 +13,7 @@ export interface OverviewStats {
     total: number
     online: number
     available: number
+    in_shift: number
   }
   total_contacts?: number
   active_conversations?: number
@@ -27,11 +28,19 @@ export interface AgentStats {
   username: string
   full_name: string
   department: string
+  role: string
   is_online: boolean
   is_available: boolean
   department_contacts: number
   resolved_today?: number
   avg_response_time?: number
+  shift: {
+    id: number
+    name: string
+    start_time: string
+    end_time: string
+  } | null
+  is_in_shift: boolean
 }
 
 export function useOverviewStats() {

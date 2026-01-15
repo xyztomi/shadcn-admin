@@ -9,12 +9,13 @@ import {
   MessagesSquare,
   Loader2,
   Radio,
+  Trash2,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { useContacts, type Contact } from '@/api/contacts'
 import { useAgents, type Agent } from '@/api/agents'
-import { useConversation, useSendMessage, useMarkAsRead, type Message } from '@/api/chat'
+import { useConversation, useSendMessage, useMarkAsRead, useDeleteChat, type Message } from '@/api/chat'
 import { useWebSocket } from '@/hooks/use-websocket'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -22,6 +23,13 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -110,9 +118,11 @@ export function Chats() {
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [mobileSelectedContact, setMobileSelectedContact] = useState<Contact | null>(null)
   const [messageText, setMessageText] = useState('')
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messageInputRef = useRef<HTMLInputElement>(null)
   const currentUser = useAuthStore((state) => state.auth.user)
+  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'superuser'
 
   // Fetch contacts for the chat list
   const { data: contacts, isLoading: contactsLoading } = useContacts()
@@ -138,6 +148,7 @@ export function Chats() {
   // Mutations
   const sendMutation = useSendMessage()
   const markAsReadMutation = useMarkAsRead()
+  const deleteChatMutation = useDeleteChat()
 
   // Handle WebSocket events for toast notifications on failed messages
   const handleWebSocketEvent = useCallback(
@@ -215,6 +226,18 @@ export function Chats() {
   const handleSelectContact = (contact: Contact) => {
     setSelectedContact(contact)
     setMobileSelectedContact(contact)
+  }
+
+  const handleDeleteChat = async () => {
+    if (!selectedContact) return
+
+    try {
+      await deleteChatMutation.mutateAsync(selectedContact.wa_id)
+      toast.success('Chat history deleted')
+      setShowDeleteDialog(false)
+    } catch {
+      toast.error('Failed to delete chat')
+    }
   }
 
   return (
@@ -354,9 +377,24 @@ export function Chats() {
                       </div>
                     </div>
                   </div>
-                  <Button size='icon' variant='ghost' className='h-10 rounded-md'>
-                    <MoreVertical className='stroke-muted-foreground' />
-                  </Button>
+                  {isAdmin && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button size='icon' variant='ghost' className='h-10 rounded-md'>
+                          <MoreVertical className='stroke-muted-foreground' />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align='end'>
+                        <DropdownMenuItem
+                          onClick={() => setShowDeleteDialog(true)}
+                          className='text-destructive focus:text-destructive'
+                        >
+                          <Trash2 className='mr-2 h-4 w-4' />
+                          Delete Chat History
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                 </div>
                 {/* Tags */}
                 <div className='mt-2 ps-12 lg:ps-16'>
@@ -518,6 +556,28 @@ export function Chats() {
           )}
         </section>
       </Main>
+
+      {/* Delete Chat Confirmation Dialog */}
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title='Delete Chat History'
+        desc={
+          <>
+            Are you sure you want to delete all chat history with{' '}
+            <strong>{selectedContact?.name || selectedContact?.phone_number}</strong>?
+            <br />
+            <br />
+            <span className='text-destructive'>
+              This will permanently delete all messages. This action cannot be undone.
+            </span>
+          </>
+        }
+        confirmText='Delete Chat'
+        destructive
+        handleConfirm={handleDeleteChat}
+        isLoading={deleteChatMutation.isPending}
+      />
     </>
   )
 }

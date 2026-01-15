@@ -99,3 +99,17 @@ export function useUnreadCount(waId: string) {
     refetchInterval: 30 * 1000, // Refresh every 30 seconds
   })
 }
+
+// Delete chat history (admin only)
+export function useDeleteChat() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (waId: string) => {
+      await api.delete(`/chat/${waId}`)
+    },
+    onSuccess: (_data, waId) => {
+      queryClient.invalidateQueries({ queryKey: ['contacts'] })
+      queryClient.invalidateQueries({ queryKey: ['conversation', waId] })
+    },
+  })
+}

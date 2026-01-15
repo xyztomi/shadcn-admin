@@ -1,6 +1,6 @@
 import { type Row } from '@tanstack/react-table'
 import { useNavigate } from '@tanstack/react-router'
-import { MoreHorizontal, MessageSquare, UserPlus, Tag, Edit } from 'lucide-react'
+import { MoreHorizontal, MessageSquare, UserPlus, Tag, Edit, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { type Contact } from '../data/schema'
 import { useContactsContext } from './contacts-provider'
+import { useAuthStore } from '@/stores/auth-store'
 
 interface ContactsRowActionsProps {
   row: Row<Contact>
@@ -19,6 +20,8 @@ interface ContactsRowActionsProps {
 export function ContactsRowActions({ row }: ContactsRowActionsProps) {
   const navigate = useNavigate()
   const { setOpen, setCurrentContact } = useContactsContext()
+  const currentUser = useAuthStore((state) => state.auth.user)
+  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'superuser'
 
   const handleOpenChat = () => {
     navigate({ to: '/chats', search: { wa_id: row.original.wa_id } })
@@ -37,6 +40,11 @@ export function ContactsRowActions({ row }: ContactsRowActionsProps) {
   const handleEdit = () => {
     setCurrentContact(row.original)
     setOpen('edit')
+  }
+
+  const handleDelete = () => {
+    setCurrentContact(row.original)
+    setOpen('delete')
   }
 
   return (
@@ -65,6 +73,18 @@ export function ContactsRowActions({ row }: ContactsRowActionsProps) {
           <Edit className='mr-2 h-4 w-4' />
           Edit Contact
         </DropdownMenuItem>
+        {isAdmin && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={handleDelete}
+              className='text-destructive focus:text-destructive'
+            >
+              <Trash2 className='mr-2 h-4 w-4' />
+              Delete Contact
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )

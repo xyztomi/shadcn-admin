@@ -118,3 +118,16 @@ export function useRemoveServiceTag() {
     },
   })
 }
+
+// Delete contact (admin only)
+export function useDeleteContact() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (waId: string) => {
+      await api.delete(`/contacts/${waId}`)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contacts'] })
+    },
+  })
+}

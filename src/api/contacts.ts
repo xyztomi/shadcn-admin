@@ -10,6 +10,7 @@ export { ServiceTag }
 export interface ContactFilters {
   service_tag?: ServiceTag
   is_active?: boolean
+  is_resolved?: boolean
   limit?: number
   offset?: number
 }
@@ -125,6 +126,34 @@ export function useDeleteContact() {
   return useMutation({
     mutationFn: async (waId: string) => {
       await api.delete(`/contacts/${waId}`)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contacts'] })
+    },
+  })
+}
+
+// Resolve contact conversation
+export function useResolveContact() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (waId: string) => {
+      const response = await api.post(`/contacts/${waId}/resolve`)
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contacts'] })
+    },
+  })
+}
+
+// Unresolve (reopen) contact conversation
+export function useUnresolveContact() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (waId: string) => {
+      const response = await api.post(`/contacts/${waId}/unresolve`)
+      return response.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contacts'] })

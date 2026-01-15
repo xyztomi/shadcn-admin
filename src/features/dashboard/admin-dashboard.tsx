@@ -2,7 +2,7 @@ import {
   MessageSquare,
   Users,
   Clock,
-  AlertCircle,
+  // AlertCircle,
   Headphones,
   CalendarClock,
 } from 'lucide-react'
@@ -202,17 +202,17 @@ export function AdminDashboard() {
               <StatCard
                 title='Avg Response Time'
                 value={formatResponseTime(stats?.avg_response_time)}
-                description='SLA target ≤ 5m'
+                // description='SLA target ≤ 5m'
                 icon={Clock}
                 isLoading={statsLoading}
               />
-              <StatCard
+              {/* <StatCard
                 title='Unassigned Queue'
                 value={formatNumber(queueUnassigned)}
                 description='Waiting for routing'
                 icon={AlertCircle}
                 isLoading={statsLoading || analyticsLoading}
-              />
+              /> */}
               <StatCard
                 title='Agents Online'
                 value={formatNumber(agentsOnlineTotal)}
@@ -251,7 +251,7 @@ export function AdminDashboard() {
                       const summary = departmentsSummary?.[key]
                       const label = key === 'viufinder' ? 'Viufinder' : 'Viufinder XP'
                       const contacts = summary?.contacts.total ?? 0
-                      const unassigned = summary?.contacts.unassigned ?? 0
+                      // const unassigned = summary?.contacts.unassigned ?? 0
                       const online = summary?.agents.online ?? 0
                       const total = summary?.agents.total ?? 0
                       const loadPercent = Math.min(
@@ -263,9 +263,6 @@ export function AdminDashboard() {
                           <div className='flex items-center justify-between'>
                             <div>
                               <p className='text-sm font-semibold'>{label}</p>
-                              <p className='text-xs text-muted-foreground'>
-                                {unassigned.toLocaleString()} waiting
-                              </p>
                             </div>
                             <span className='text-xs text-muted-foreground'>
                               {online}/{total} agents
@@ -282,7 +279,7 @@ export function AdminDashboard() {
                               <p className='text-2xl font-semibold'>{contacts.toLocaleString()}</p>
                               <p className='text-xs text-muted-foreground'>contacts</p>
                             </div>
-                            <p className='text-xs text-muted-foreground'>Target ≤ {TARGET_LOAD} chats/agent</p>
+                            {/* <p className='text-xs text-muted-foreground'>Target ≤ {TARGET_LOAD} chats/agent</p> */}
                           </div>
                         </div>
                       )

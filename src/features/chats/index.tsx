@@ -12,11 +12,13 @@ import {
   Trash2,
   Clock,
   MapPin,
+  CheckCircle,
+  RotateCcw,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { useContacts, type Contact } from '@/api/contacts'
-import { useAgents, useMyShiftStatus, type Agent } from '@/api/agents'
+import { useContacts, useResolveContact, useUnresolveContact, type Contact } from '@/api/contacts'
+import { useAllAgents, useMyShiftStatus, type Agent } from '@/api/agents'
 import { useConversation, useSendMessage, useMarkAsRead, useDeleteChat, type Message } from '@/api/chat'
 import { useWebSocket } from '@/hooks/use-websocket'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -26,6 +28,7 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -69,13 +72,19 @@ const getMessageSenderName = (
     return '🤖 Bot'
   }
 
-  const agentFromMessage = msg.agent_id ? agentsById?.get(msg.agent_id) : undefined
+  // For outbound messages, prioritize agent lookup by ID for consistency
+  if (msg.direction === 'outbound' && msg.agent_id) {
+    const agent = agentsById?.get(msg.agent_id)
+    if (agent) {
+      return agent.full_name || agent.username
+    }
+  }
+
+  // Fallback to message fields
   const senderCandidates: Array<string | null | undefined> = [
     msg.sender,
     msg.sender_name,
     msg.sender_username,
-    agentFromMessage?.full_name,
-    agentFromMessage?.username,
     msg.direction === 'outbound' ? msg.agent_name : msg.contact_name,
     msg.direction === 'outbound' ? msg.agent_username : msg.contact_username,
   ]
@@ -129,6 +138,7 @@ export function Chats() {
   const [mobileSelectedContact, setMobileSelectedContact] = useState<Contact | null>(null)
   const [messageText, setMessageText] = useState('')
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [activeTab, setActiveTab] = useState<'active' | 'resolved'>('active')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messageInputRef = useRef<HTMLInputElement>(null)
   const currentUser = useAuthStore((state) => state.auth.user)
@@ -140,15 +150,15 @@ export function Chats() {
 
   // Fetch contacts for the chat list
   const { data: contacts, isLoading: contactsLoading } = useContacts()
-  const { data: agents } = useAgents()
+  const { data: allAgents } = useAllAgents() // Fetch ALL agents for message sender lookup
 
   const agentsById = useMemo(() => {
     const map = new Map<number, Agent>()
-    agents?.forEach((agent) => {
+    allAgents?.forEach((agent) => {
       map.set(agent.id, agent)
     })
     return map
-  }, [agents])
+  }, [allAgents])
 
   // Fetch conversation for selected contact
   const {
@@ -163,6 +173,8 @@ export function Chats() {
   const sendMutation = useSendMessage()
   const markAsReadMutation = useMarkAsRead()
   const deleteChatMutation = useDeleteChat()
+  const resolveMutation = useResolveContact()
+  const unresolveMutation = useUnresolveContact()
 
   // Handle WebSocket events for toast notifications on failed messages
   const handleWebSocketEvent = useCallback(
@@ -207,11 +219,17 @@ export function Chats() {
     return acc
   }, {})
 
-  // Filter contacts by search
+  // Filter contacts by search and tab
   const filteredContacts = contacts?.filter(contact => {
     const searchText = contact.name || contact.phone_number || ''
-    return searchText.toLowerCase().includes(search.trim().toLowerCase())
+    const matchesSearch = searchText.toLowerCase().includes(search.trim().toLowerCase())
+    const matchesTab = activeTab === 'active' ? !contact.is_resolved : contact.is_resolved
+    return matchesSearch && matchesTab
   }) ?? []
+
+  // Count contacts by status
+  const activeCount = contacts?.filter(c => !c.is_resolved).length ?? 0
+  const resolvedCount = contacts?.filter(c => c.is_resolved).length ?? 0
 
   // Mark messages as read when selecting a contact
   useEffect(() => {
@@ -254,6 +272,32 @@ export function Chats() {
     }
   }
 
+  const handleResolve = async () => {
+    if (!selectedContact) return
+
+    try {
+      await resolveMutation.mutateAsync(selectedContact.wa_id)
+      toast.success('Conversation marked as resolved')
+      setSelectedContact(null)
+      setMobileSelectedContact(null)
+    } catch {
+      toast.error('Failed to resolve conversation')
+    }
+  }
+
+  const handleUnresolve = async () => {
+    if (!selectedContact) return
+
+    try {
+      await unresolveMutation.mutateAsync(selectedContact.wa_id)
+      toast.success('Conversation reopened')
+      setSelectedContact(null)
+      setMobileSelectedContact(null)
+    } catch {
+      toast.error('Failed to reopen conversation')
+    }
+  }
+
   return (
     <>
       <Header>
@@ -293,6 +337,18 @@ export function Chats() {
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </label>
+
+              {/* Tabs */}
+              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'active' | 'resolved')} className='mt-3'>
+                <TabsList className='grid w-full grid-cols-2'>
+                  <TabsTrigger value='active' className='text-xs'>
+                    Active {activeCount > 0 && <Badge variant='secondary' className='ml-1 h-5 px-1.5'>{activeCount}</Badge>}
+                  </TabsTrigger>
+                  <TabsTrigger value='resolved' className='text-xs'>
+                    Resolved {resolvedCount > 0 && <Badge variant='secondary' className='ml-1 h-5 px-1.5'>{resolvedCount}</Badge>}
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
 
             <ScrollArea className='-mx-3 h-full overflow-scroll p-3'>
@@ -304,7 +360,7 @@ export function Chats() {
                 </div>
               ) : filteredContacts.length === 0 ? (
                 <p className='text-center text-sm text-muted-foreground py-8'>
-                  No contacts found
+                  {activeTab === 'active' ? 'No active conversations' : 'No resolved conversations'}
                 </p>
               ) : (
                 filteredContacts.map((contact) => (
@@ -391,24 +447,49 @@ export function Chats() {
                       </div>
                     </div>
                   </div>
-                  {isAdmin && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button size='icon' variant='ghost' className='h-10 rounded-md'>
-                          <MoreVertical className='stroke-muted-foreground' />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align='end'>
-                        <DropdownMenuItem
-                          onClick={() => setShowDeleteDialog(true)}
-                          className='text-destructive focus:text-destructive'
-                        >
-                          <Trash2 className='mr-2 h-4 w-4' />
-                          Delete Chat History
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
+                  <div className='flex items-center gap-2'>
+                    {/* Resolve/Unresolve button */}
+                    {selectedContact.is_resolved ? (
+                      <Button
+                        size='sm'
+                        variant='outline'
+                        onClick={handleUnresolve}
+                        disabled={unresolveMutation.isPending}
+                      >
+                        <RotateCcw className='mr-2 h-4 w-4' />
+                        Reopen
+                      </Button>
+                    ) : (
+                      <Button
+                        size='sm'
+                        variant='default'
+                        onClick={handleResolve}
+                        disabled={resolveMutation.isPending}
+                        className='bg-green-600 hover:bg-green-700'
+                      >
+                        <CheckCircle className='mr-2 h-4 w-4' />
+                        Resolve
+                      </Button>
+                    )}
+                    {isAdmin && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button size='icon' variant='ghost' className='h-10 rounded-md'>
+                            <MoreVertical className='stroke-muted-foreground' />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align='end'>
+                          <DropdownMenuItem
+                            onClick={() => setShowDeleteDialog(true)}
+                            className='text-destructive focus:text-destructive'
+                          >
+                            <Trash2 className='mr-2 h-4 w-4' />
+                            Delete Chat History
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </div>
                 </div>
                 {/* Tags */}
                 <div className='mt-2 ps-12 lg:ps-16 flex items-center gap-2 flex-wrap'>

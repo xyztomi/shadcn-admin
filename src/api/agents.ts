@@ -67,6 +67,18 @@ export function useAgents(filters?: AgentFilters) {
   })
 }
 
+// List ALL agents (no department filter) - for chat sender name lookup
+export function useAllAgents() {
+  return useQuery({
+    queryKey: ['agents', 'all'],
+    queryFn: async (): Promise<Agent[]> => {
+      const response = await api.get('/agents')
+      return response.data
+    },
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes since agent data doesn't change often
+  })
+}
+
 // Get single agent
 export function useAgent(agentId: number) {
   return useQuery({

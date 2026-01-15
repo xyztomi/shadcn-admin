@@ -11,6 +11,7 @@ import {
   Radio,
   Trash2,
   Clock,
+  MapPin,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -42,6 +43,13 @@ import { useAuthStore, type AuthUser } from '@/stores/auth-store'
 import { MessageStatusIcon } from './components/message-status-icon'
 import { TagSelector } from './components/tag-selector'
 import { QuickReplyPicker } from './components/quick-reply-picker'
+
+const boothLabels: Record<string, string> = {
+  king_padel_kemang: 'King Padel Kemang',
+  kyzn_kuningan: 'KYZN Kuningan',
+  mr_padel_cipete: 'Mr Padel Cipete',
+  other: 'Other',
+}
 
 const getMessageContent = (msg: Message): string => {
   if (typeof msg.content === 'string' && msg.content.length > 0) return msg.content
@@ -403,8 +411,14 @@ export function Chats() {
                   )}
                 </div>
                 {/* Tags */}
-                <div className='mt-2 ps-12 lg:ps-16'>
+                <div className='mt-2 ps-12 lg:ps-16 flex items-center gap-2 flex-wrap'>
                   <TagSelector waId={selectedContact.wa_id} />
+                  {selectedContact.booth_tag && (
+                    <Badge variant='secondary' className='gap-1'>
+                      <MapPin className='h-3 w-3' />
+                      {boothLabels[selectedContact.booth_tag] || selectedContact.booth_tag}
+                    </Badge>
+                  )}
                 </div>
               </div>
 

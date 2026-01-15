@@ -1,7 +1,7 @@
 import {
   MessageSquare,
   Users,
-  Clock,
+  // Clock,
   // AlertCircle,
   Headphones,
   CalendarClock,
@@ -199,13 +199,13 @@ export function AdminDashboard() {
                 icon={MessageSquare}
                 isLoading={statsLoading || analyticsLoading}
               />
-              <StatCard
+              {/* <StatCard
                 title='Avg Response Time'
                 value={formatResponseTime(stats?.avg_response_time)}
                 // description='SLA target ≤ 5m'
                 icon={Clock}
                 isLoading={statsLoading}
-              />
+              /> */}
               {/* <StatCard
                 title='Unassigned Queue'
                 value={formatNumber(queueUnassigned)}

@@ -101,16 +101,35 @@ export const contactsColumns: ColumnDef<Contact>[] = [
     },
   },
   {
-    accessorKey: 'unread_count',
+    accessorKey: 'tags',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Unread' />
+      <DataTableColumnHeader column={column} title='Tags' />
     ),
     cell: ({ row }) => {
-      const count = row.getValue('unread_count') as number
-      return count > 0 ? (
-        <Badge variant='destructive'>{count}</Badge>
-      ) : (
-        <span className='text-muted-foreground'>0</span>
+      const tags = row.original.tags || []
+      if (tags.length === 0) return <span className='text-muted-foreground'>-</span>
+      return (
+        <div className='flex flex-wrap gap-1'>
+          {tags.slice(0, 2).map((tag) => (
+            <Badge
+              key={tag.id}
+              variant='secondary'
+              className='text-xs px-1.5'
+              style={{ backgroundColor: tag.color ? `${tag.color}30` : undefined }}
+            >
+              <span
+                className='h-1.5 w-1.5 rounded-full mr-1'
+                style={{ backgroundColor: tag.color || '#6b7280' }}
+              />
+              {tag.name}
+            </Badge>
+          ))}
+          {tags.length > 2 && (
+            <Badge variant='outline' className='text-xs px-1'>
+              +{tags.length - 2}
+            </Badge>
+          )}
+        </div>
       )
     },
   },

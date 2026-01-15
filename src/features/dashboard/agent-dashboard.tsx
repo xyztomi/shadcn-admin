@@ -21,14 +21,14 @@ import {
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Switch } from '@/components/ui/switch'
+// import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { useMyStats } from '@/api/stats'
-import { useUpdateAvailability } from '@/api/agents'
+// import { useUpdateAvailability } from '@/api/agents'
 import { AnalyticsChart } from './components/analytics-chart'
 
 function StatCard({
@@ -83,11 +83,11 @@ function formatResponseTime(seconds?: number | null): string {
 
 export function AgentDashboard() {
   const { data: stats, isLoading } = useMyStats()
-  const updateAvailability = useUpdateAvailability()
+  // const updateAvailability = useUpdateAvailability()
 
-  const handleAvailabilityToggle = (checked: boolean) => {
-    updateAvailability.mutate({ is_available: checked })
-  }
+  // const handleAvailabilityToggle = (checked: boolean) => {
+  //   updateAvailability.mutate({ is_available: checked })
+  // }
 
   const departmentLabel =
     stats?.agent.department === 'viufinder_xp' ? 'Viufinder XP' : 'Viufinder'
@@ -139,7 +139,7 @@ export function AgentDashboard() {
               </p>
             </div>
             <div className='flex flex-wrap gap-4'>
-              <Card className='flex items-center gap-4 p-4'>
+              {/* <Card className='flex items-center gap-4 p-4'>
                 <div>
                   <p className='text-sm font-medium'>Available for chats</p>
                   <p className='text-xs text-muted-foreground'>
@@ -151,7 +151,7 @@ export function AgentDashboard() {
                   onCheckedChange={handleAvailabilityToggle}
                   disabled={isLoading || updateAvailability.isPending}
                 />
-              </Card>
+              </Card> */}
               {/* Shift Status Card */}
               <Card className='flex items-center gap-4 p-4'>
                 <CalendarClock className='h-8 w-8 text-muted-foreground' />
@@ -268,7 +268,7 @@ export function AgentDashboard() {
                       </div>
                       <p className='text-2xl font-bold'>{stats?.week.resolved ?? 0}</p>
                     </div>
-                    <div className='flex items-center justify-between rounded-lg border p-4'>
+                    {/* <div className='flex items-center justify-between rounded-lg border p-4'>
                       <div className='flex items-center gap-3'>
                         <Clock className='h-5 w-5 text-muted-foreground' />
                         <div>
@@ -281,7 +281,7 @@ export function AgentDashboard() {
                       <p className='text-2xl font-bold'>
                         {formatResponseTime(stats?.week.avg_response_time)}
                       </p>
-                    </div>
+                    </div> */}
                   </div>
                 )}
               </CardContent>

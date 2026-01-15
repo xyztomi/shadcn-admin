@@ -385,22 +385,36 @@ export function Chats() {
                             <span className='font-medium truncate'>
                               {contact.name || contact.phone_number}
                             </span>
-                            {contact.unread_count > 0 && (
-                              <Badge variant='destructive' className='ml-2'>
-                                {contact.unread_count}
-                              </Badge>
-                            )}
                           </div>
-                          <div className='flex items-center gap-1'>
+                          <div className='flex items-center gap-1 flex-wrap'>
                             {contact.service_tag && (
                               <Badge variant='outline' className='text-xs'>
                                 {contact.service_tag === 'viufinder' ? 'VF' : 'XP'}
                               </Badge>
                             )}
-                            <span className='text-xs text-muted-foreground truncate'>
-                              {safeFormat(contact.last_message_at, 'MMM d, HH:mm', 'No messages')}
-                            </span>
+                            {contact.tags?.slice(0, 2).map((tag) => (
+                              <Badge
+                                key={tag.id}
+                                variant='secondary'
+                                className='text-xs px-1.5'
+                                style={{ backgroundColor: tag.color ? `${tag.color}30` : undefined }}
+                              >
+                                <span
+                                  className='h-1.5 w-1.5 rounded-full mr-1'
+                                  style={{ backgroundColor: tag.color || '#6b7280' }}
+                                />
+                                {tag.name}
+                              </Badge>
+                            ))}
+                            {contact.tags?.length > 2 && (
+                              <Badge variant='outline' className='text-xs px-1'>
+                                +{contact.tags.length - 2}
+                              </Badge>
+                            )}
                           </div>
+                          <span className='text-xs text-muted-foreground'>
+                            {safeFormat(contact.last_message_at, 'MMM d, HH:mm', 'No messages')}
+                          </span>
                         </div>
                       </div>
                     </button>

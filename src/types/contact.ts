@@ -10,6 +10,12 @@ export enum BoothTag {
   OTHER = 'other',
 }
 
+export interface ContactTag {
+  id: number
+  name: string
+  color: string
+}
+
 export interface Contact {
   wa_id: string
   name: string | null
@@ -21,6 +27,7 @@ export interface Contact {
   notes: string | null
   last_message_at: string | null
   unread_count: number
+  tags: ContactTag[]
   created_at: string
   updated_at: string
 }

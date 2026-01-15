@@ -46,6 +46,11 @@ const getMessageSenderName = (
   contact: Contact | null,
   agentsById?: Map<number, Agent>
 ): string => {
+  // Bot messages always show "Bot"
+  if (msg.is_bot) {
+    return '🤖 Bot'
+  }
+
   const agentFromMessage = msg.agent_id ? agentsById?.get(msg.agent_id) : undefined
   const senderCandidates: Array<string | null | undefined> = [
     msg.sender,

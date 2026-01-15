@@ -81,6 +81,33 @@ export const contactsColumns: ColumnDef<Contact>[] = [
     },
   },
   {
+    accessorKey: 'city_tag',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='City' />
+    ),
+    cell: ({ row }) => {
+      const city = row.getValue('city_tag') as string | null
+      if (!city) return <span className='text-muted-foreground'>-</span>
+      const cityLabels: Record<string, string> = {
+        jakarta: 'Jakarta',
+        bandung: 'Bandung',
+        surabaya: 'Surabaya',
+        medan: 'Medan',
+        semarang: 'Semarang',
+        makassar: 'Makassar',
+        palembang: 'Palembang',
+        tangerang: 'Tangerang',
+        depok: 'Depok',
+        bekasi: 'Bekasi',
+        other: 'Lainnya',
+      }
+      return <span className='text-sm'>{cityLabels[city] || city}</span>
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
+  },
+  {
     accessorKey: 'unread_count',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Unread' />

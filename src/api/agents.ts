@@ -1,14 +1,21 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { type Agent, type Contact, AgentRole, AgentDepartment } from '@/types'
+import {
+  type Agent,
+  type Contact,
+  AgentRole,
+  AgentDepartment,
+  AgentCity,
+} from '@/types'
 import { useDepartmentStore } from '@/stores/department-store'
 import { api } from './client'
 
 // Re-export for convenience
 export type { Agent }
-export { AgentRole, AgentDepartment }
+export { AgentRole, AgentDepartment, AgentCity }
 
 export interface AgentFilters {
   department?: AgentDepartment
+  city?: AgentCity
   is_available?: boolean
   is_online?: boolean
   shift_id?: number
@@ -21,6 +28,7 @@ export interface CreateAgentPayload {
   email?: string
   role: AgentRole
   department: AgentDepartment
+  city?: AgentCity
   shift_id?: number | null
 }
 
@@ -30,6 +38,7 @@ export interface UpdateAgentPayload {
   password?: string
   role?: AgentRole
   department?: AgentDepartment
+  city?: AgentCity
   shift_id?: number | null
 }
 

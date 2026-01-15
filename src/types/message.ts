@@ -37,6 +37,8 @@ export interface Message {
   /** Sender metadata provided by the backend for agent/customer attribution. */
   sender?: string | null
   agent_id?: number | null
+  /** Whether the message was sent by the bot */
+  is_bot?: boolean
   /** Broadcast ID if this message was sent via broadcast */
   broadcast_id?: number | null
   sender_name?: string | null

@@ -66,7 +66,12 @@ export function useUpdateContact() {
       data,
     }: {
       waId: string
-      data: Partial<Pick<Contact, 'name' | 'notes' | 'is_active'>>
+      data: Partial<
+        Pick<
+          Contact,
+          'name' | 'notes' | 'is_active' | 'service_tag' | 'city_tag'
+        >
+      >
     }) => {
       const response = await api.patch(`/contacts/${waId}`, data)
       return response.data
@@ -92,6 +97,20 @@ export function useTagContact() {
       const response = await api.post(`/contacts/${waId}/tag`, {
         service_tag: serviceTag,
       })
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contacts'] })
+    },
+  })
+}
+
+// Remove service tag from contact
+export function useRemoveServiceTag() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (waId: string) => {
+      const response = await api.delete(`/contacts/${waId}/tag`)
       return response.data
     },
     onSuccess: () => {

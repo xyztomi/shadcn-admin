@@ -12,7 +12,7 @@ import {
 } from '@/api/agents'
 import { useShifts } from '@/api/shifts'
 import { handleServerError } from '@/lib/handle-server-error'
-import { AgentDepartment, AgentRole } from '@/types'
+import { AgentDepartment, AgentRole, AgentCity } from '@/types'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -52,6 +52,7 @@ const agentFormSchema = z.object({
   full_name: z.string().min(1, 'Full name is required'),
   email: z.string().email().optional().or(z.literal('')),
   department: z.nativeEnum(AgentDepartment),
+  city: z.nativeEnum(AgentCity),
   role: z.nativeEnum(AgentRole),
   shift_id: z.string().optional(),
 })
@@ -64,6 +65,7 @@ const agentFormFields: Array<keyof AgentForm> = [
   'full_name',
   'email',
   'department',
+  'city',
   'role',
   'shift_id',
 ]
@@ -91,6 +93,7 @@ export function AgentsActionDialog() {
       full_name: '',
       email: '',
       department: AgentDepartment.VIUFINDER,
+      city: AgentCity.ALL,
       role: AgentRole.AGENT,
       shift_id: '',
     },
@@ -104,6 +107,7 @@ export function AgentsActionDialog() {
         full_name: currentRow.full_name,
         email: currentRow.email || '',
         department: currentRow.department,
+        city: currentRow.city || AgentCity.ALL,
         role: currentRow.role,
         password: '',
         shift_id: currentRow.shift_id?.toString() || '',
@@ -115,6 +119,7 @@ export function AgentsActionDialog() {
         full_name: '',
         email: '',
         department: AgentDepartment.VIUFINDER,
+        city: AgentCity.ALL,
         role: AgentRole.AGENT,
         shift_id: '',
       })
@@ -138,6 +143,7 @@ export function AgentsActionDialog() {
           full_name: data.full_name,
           email: data.email || undefined,
           department: data.department,
+          city: data.city,
           role: data.role,
           shift_id: shiftId,
         }
@@ -157,6 +163,7 @@ export function AgentsActionDialog() {
           full_name: data.full_name,
           email: data.email || undefined,
           department: data.department,
+          city: data.city,
           role: data.role,
           shift_id: shiftId,
         }
@@ -306,6 +313,39 @@ export function AgentsActionDialog() {
                 )}
               />
             </div>
+            <FormField
+              control={form.control}
+              name='city'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>City Assignment</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(value as AgentCity)}
+                    value={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder='Select city' />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value={AgentCity.ALL}>All Cities</SelectItem>
+                      <SelectItem value={AgentCity.JAKARTA}>Jakarta</SelectItem>
+                      <SelectItem value={AgentCity.BANDUNG}>Bandung</SelectItem>
+                      <SelectItem value={AgentCity.SURABAYA}>Surabaya</SelectItem>
+                      <SelectItem value={AgentCity.MEDAN}>Medan</SelectItem>
+                      <SelectItem value={AgentCity.SEMARANG}>Semarang</SelectItem>
+                      <SelectItem value={AgentCity.MAKASSAR}>Makassar</SelectItem>
+                      <SelectItem value={AgentCity.PALEMBANG}>Palembang</SelectItem>
+                      <SelectItem value={AgentCity.TANGERANG}>Tangerang</SelectItem>
+                      <SelectItem value={AgentCity.DEPOK}>Depok</SelectItem>
+                      <SelectItem value={AgentCity.BEKASI}>Bekasi</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name='shift_id'

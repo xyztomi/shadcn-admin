@@ -43,6 +43,7 @@ import { Route as AuthenticatedSettingsWebhookRouteImport } from './routes/_auth
 import { Route as AuthenticatedSettingsTagsRouteImport } from './routes/_authenticated/settings/tags'
 import { Route as AuthenticatedSettingsQuickRepliesRouteImport } from './routes/_authenticated/settings/quick-replies'
 import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes/_authenticated/settings/notifications'
+import { Route as AuthenticatedSettingsMediaAssetsRouteImport } from './routes/_authenticated/settings/media-assets'
 import { Route as AuthenticatedSettingsDisplayRouteImport } from './routes/_authenticated/settings/display'
 import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
@@ -230,6 +231,12 @@ const AuthenticatedSettingsNotificationsRoute =
     path: '/notifications',
     getParentRoute: () => AuthenticatedSettingsRouteRoute,
   } as any)
+const AuthenticatedSettingsMediaAssetsRoute =
+  AuthenticatedSettingsMediaAssetsRouteImport.update({
+    id: '/media-assets',
+    path: '/media-assets',
+    getParentRoute: () => AuthenticatedSettingsRouteRoute,
+  } as any)
 const AuthenticatedSettingsDisplayRoute =
   AuthenticatedSettingsDisplayRouteImport.update({
     id: '/display',
@@ -280,6 +287,7 @@ export interface FileRoutesByFullPath {
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
+  '/settings/media-assets': typeof AuthenticatedSettingsMediaAssetsRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/settings/quick-replies': typeof AuthenticatedSettingsQuickRepliesRoute
   '/settings/tags': typeof AuthenticatedSettingsTagsRoute
@@ -317,6 +325,7 @@ export interface FileRoutesByTo {
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
+  '/settings/media-assets': typeof AuthenticatedSettingsMediaAssetsRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/settings/quick-replies': typeof AuthenticatedSettingsQuickRepliesRoute
   '/settings/tags': typeof AuthenticatedSettingsTagsRoute
@@ -359,6 +368,7 @@ export interface FileRoutesById {
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayRoute
+  '/_authenticated/settings/media-assets': typeof AuthenticatedSettingsMediaAssetsRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/_authenticated/settings/quick-replies': typeof AuthenticatedSettingsQuickRepliesRoute
   '/_authenticated/settings/tags': typeof AuthenticatedSettingsTagsRoute
@@ -399,6 +409,7 @@ export interface FileRouteTypes {
     | '/errors/$error'
     | '/settings/appearance'
     | '/settings/display'
+    | '/settings/media-assets'
     | '/settings/notifications'
     | '/settings/quick-replies'
     | '/settings/tags'
@@ -436,6 +447,7 @@ export interface FileRouteTypes {
     | '/errors/$error'
     | '/settings/appearance'
     | '/settings/display'
+    | '/settings/media-assets'
     | '/settings/notifications'
     | '/settings/quick-replies'
     | '/settings/tags'
@@ -477,6 +489,7 @@ export interface FileRouteTypes {
     | '/_authenticated/errors/$error'
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/display'
+    | '/_authenticated/settings/media-assets'
     | '/_authenticated/settings/notifications'
     | '/_authenticated/settings/quick-replies'
     | '/_authenticated/settings/tags'
@@ -752,6 +765,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsNotificationsRouteImport
       parentRoute: typeof AuthenticatedSettingsRouteRoute
     }
+    '/_authenticated/settings/media-assets': {
+      id: '/_authenticated/settings/media-assets'
+      path: '/media-assets'
+      fullPath: '/settings/media-assets'
+      preLoaderRoute: typeof AuthenticatedSettingsMediaAssetsRouteImport
+      parentRoute: typeof AuthenticatedSettingsRouteRoute
+    }
     '/_authenticated/settings/display': {
       id: '/_authenticated/settings/display'
       path: '/display'
@@ -793,6 +813,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedSettingsRouteRouteChildren {
   AuthenticatedSettingsAppearanceRoute: typeof AuthenticatedSettingsAppearanceRoute
   AuthenticatedSettingsDisplayRoute: typeof AuthenticatedSettingsDisplayRoute
+  AuthenticatedSettingsMediaAssetsRoute: typeof AuthenticatedSettingsMediaAssetsRoute
   AuthenticatedSettingsNotificationsRoute: typeof AuthenticatedSettingsNotificationsRoute
   AuthenticatedSettingsQuickRepliesRoute: typeof AuthenticatedSettingsQuickRepliesRoute
   AuthenticatedSettingsTagsRoute: typeof AuthenticatedSettingsTagsRoute
@@ -804,6 +825,8 @@ const AuthenticatedSettingsRouteRouteChildren: AuthenticatedSettingsRouteRouteCh
   {
     AuthenticatedSettingsAppearanceRoute: AuthenticatedSettingsAppearanceRoute,
     AuthenticatedSettingsDisplayRoute: AuthenticatedSettingsDisplayRoute,
+    AuthenticatedSettingsMediaAssetsRoute:
+      AuthenticatedSettingsMediaAssetsRoute,
     AuthenticatedSettingsNotificationsRoute:
       AuthenticatedSettingsNotificationsRoute,
     AuthenticatedSettingsQuickRepliesRoute:

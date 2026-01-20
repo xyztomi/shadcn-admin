@@ -14,6 +14,7 @@ import {
   MapPin,
   CheckCircle,
   RotateCcw,
+  Paperclip,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -46,6 +47,7 @@ import { useAuthStore, type AuthUser } from '@/stores/auth-store'
 import { MessageStatusIcon } from './components/message-status-icon'
 import { TagSelector } from './components/tag-selector'
 import { QuickReplyPicker } from './components/quick-reply-picker'
+import { MediaAssetPicker } from './components/media-asset-picker'
 
 const boothLabels: Record<string, string> = {
   king_padel_kemang: 'King Padel Kemang',
@@ -644,6 +646,17 @@ export function Chats() {
                       inputRef={messageInputRef}
                       disabled={!canSendMessages}
                     />
+                    <MediaAssetPicker waId={selectedContact?.wa_id || ''} disabled={!canSendMessages}>
+                      <Button
+                        type='button'
+                        variant='ghost'
+                        size='icon'
+                        className='h-8 w-8'
+                        disabled={!canSendMessages}
+                      >
+                        <Paperclip className='h-4 w-4' />
+                      </Button>
+                    </MediaAssetPicker>
                     <input
                       ref={messageInputRef}
                       type='text'

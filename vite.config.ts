@@ -20,7 +20,7 @@ export default defineConfig({
     },
   },
   server: {
-    allowedHosts: ['1d0c33657f5a.ngrok-free.app'],
+    allowedHosts: ['train-attending-wires-pac.trycloudflare.com'],
     proxy: {
       '/api': {
         target: 'http://localhost:8000',

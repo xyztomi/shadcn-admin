@@ -152,6 +152,7 @@ export const sidebarData: SidebarData = {
     // },
     {
       title: 'Other',
+      roles: ['superuser', 'admin', 'manager'], // Only admin+ can see this group
       items: [
         {
           title: 'Settings',

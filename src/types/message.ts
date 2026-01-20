@@ -23,6 +23,15 @@ export enum MessageType {
   INTERACTIVE = 'interactive',
 }
 
+/** Sentiment tag for inbound messages to track complaints */
+export enum MessageSentiment {
+  NEUTRAL = 'neutral',
+  COMPLAINT = 'complaint',
+  COMPLIMENT = 'compliment',
+  INQUIRY = 'inquiry',
+  URGENT = 'urgent',
+}
+
 export interface Message {
   id: string
   wa_id: string
@@ -61,4 +70,10 @@ export interface Message {
   delivered_at?: string | null
   /** Timestamp when status became 'read' */
   read_at?: string | null
+  /** Sentiment tag for complaint rate tracking */
+  sentiment?: MessageSentiment | null
+  /** Agent who tagged this message's sentiment */
+  sentiment_tagged_by?: number | null
+  /** When the sentiment was tagged */
+  sentiment_tagged_at?: string | null
 }

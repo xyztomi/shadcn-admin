@@ -293,3 +293,92 @@ export async function exportOverviewAnalytics(
   document.body.removeChild(link)
   window.URL.revokeObjectURL(url)
 }
+
+// ============ COMPLAINT RATE ANALYTICS ============
+
+export interface AgentComplaintRate {
+  agent_id: number
+  agent_name: string
+  agent_department: string | null
+  agent_booth: string | null
+  total_tagged_messages: number
+  complaint_count: number
+  complaint_rate: number
+  sentiment_breakdown: Record<string, number>
+}
+
+export interface ComplaintRatesResponse {
+  period: {
+    start_date: string | null
+    end_date: string | null
+  }
+  overall: {
+    total_tagged_messages: number
+    total_complaints: number
+    overall_complaint_rate: number
+  }
+  by_agent: AgentComplaintRate[]
+}
+
+/**
+ * Get complaint rates per agent
+ */
+export async function getComplaintRates(
+  startDate?: string,
+  endDate?: string,
+  agentId?: number
+): Promise<ComplaintRatesResponse> {
+  const params = new URLSearchParams()
+  if (startDate) params.append('start_date', startDate)
+  if (endDate) params.append('end_date', endDate)
+  if (agentId) params.append('agent_id', String(agentId))
+
+  const response = await api.get(
+    `/analytics/complaint-rates?${params.toString()}`
+  )
+  return response.data
+}
+
+/**
+ * React Query hook for complaint rates
+ */
+export function useComplaintRates(
+  startDate?: string,
+  endDate?: string,
+  agentId?: number
+) {
+  return useQuery({
+    queryKey: ['analytics', 'complaint-rates', startDate, endDate, agentId],
+    queryFn: () => getComplaintRates(startDate, endDate, agentId),
+  })
+}
+
+/**
+ * Export complaint rates as CSV
+ */
+export async function exportComplaintRates(
+  startDate?: string,
+  endDate?: string
+): Promise<void> {
+  const params = new URLSearchParams()
+  if (startDate) params.append('start_date', startDate)
+  if (endDate) params.append('end_date', endDate)
+
+  const response = await api.get(
+    `/analytics/complaint-rates/export?${params.toString()}`,
+    {
+      responseType: 'blob',
+    }
+  )
+
+  // Create download link
+  const blob = new Blob([response.data], { type: 'text/csv' })
+  const url = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `complaint_rates_${startDate || 'all'}_to_${endDate || 'now'}.csv`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  window.URL.revokeObjectURL(url)
+}

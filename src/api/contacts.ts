@@ -1,18 +1,42 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { type Contact, ServiceTag } from '@/types'
+import { type Contact, ServiceTag, BoothTag } from '@/types'
 import { useDepartmentStore } from '@/stores/department-store'
 import { api } from './client'
 
 // Re-export for convenience
 export type { Contact }
-export { ServiceTag }
+export { ServiceTag, BoothTag }
 
 export interface ContactFilters {
   service_tag?: ServiceTag
+  booth_tag?: BoothTag
+  tag_id?: number
   is_active?: boolean
   is_resolved?: boolean
   limit?: number
   offset?: number
+}
+
+export interface CreateContactData {
+  name: string
+  phone_number: string
+  booth_tag?: BoothTag | null
+  service_tag?: ServiceTag | null
+  notes?: string | null
+}
+
+// Create a new contact
+export function useCreateContact() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: CreateContactData) => {
+      const response = await api.post('/contacts', data)
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contacts'] })
+    },
+  })
 }
 
 // List contacts with filters (auto-filtered by selected department)

@@ -5,15 +5,18 @@ import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
+import { Button } from '@/components/ui/button'
+import { UserPlus } from 'lucide-react'
 import { ContactsDialogs } from './components/contacts-dialogs'
-import { ContactsProvider } from './components/contacts-provider'
+import { ContactsProvider, useContactsContext } from './components/contacts-provider'
 import { ContactsTable } from './components/contacts-table'
 
-export function Contacts() {
+function ContactsContent() {
   const { data: contacts, isLoading } = useContacts()
+  const { setOpen } = useContactsContext()
 
   return (
-    <ContactsProvider>
+    <>
       <Header fixed>
         <Search />
         <div className='ms-auto flex items-center space-x-4'>
@@ -31,11 +34,23 @@ export function Contacts() {
               Manage WhatsApp contacts and their assignments
             </p>
           </div>
+          <Button onClick={() => setOpen('create')}>
+            <UserPlus className='mr-2 h-4 w-4' />
+            Add Contact
+          </Button>
         </div>
         <ContactsTable data={contacts ?? []} isLoading={isLoading} />
       </Main>
 
       <ContactsDialogs />
+    </>
+  )
+}
+
+export function Contacts() {
+  return (
+    <ContactsProvider>
+      <ContactsContent />
     </ContactsProvider>
   )
 }

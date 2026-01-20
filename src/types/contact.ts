@@ -8,6 +8,7 @@ export enum BoothTag {
   KYZN_KUNINGAN = 'kyzn_kuningan',
   MR_PADEL_CIPETE = 'mr_padel_cipete',
   OTHER = 'other',
+  ALL = 'all',
 }
 
 export interface ContactTag {

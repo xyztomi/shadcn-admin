@@ -63,14 +63,15 @@ interface AgentAssignedEvent {
 
 type WSEventHandler = (event: WebSocketEvent) => void
 
-// Use relative URL for WebSocket so Vite proxy handles it in dev
+// Connect directly to backend WebSocket (bypasses Vite proxy issues)
 function getWebSocketUrl(token: string): string {
+  // In production, use the same host as the app
   if (import.meta.env.PROD) {
-    return `ws://localhost:8000/ws?token=${token}`
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+    return `${protocol}//${window.location.host}/ws?token=${token}`
   }
-  // In dev, use relative URL through Vite proxy
-  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-  return `${protocol}//${window.location.host}/ws?token=${token}`
+  // In development, connect directly to backend to avoid proxy issues
+  return `ws://localhost:8000/ws?token=${token}`
 }
 
 // Singleton WebSocket manager to prevent multiple connections

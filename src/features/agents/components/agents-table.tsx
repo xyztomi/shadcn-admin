@@ -52,6 +52,7 @@ export function AgentsTable({ data, search, navigate, isLoading }: DataTableProp
     columnFilters: [
       { columnId: 'username', searchKey: 'username', type: 'string' },
       { columnId: 'department', searchKey: 'department', type: 'array' },
+      { columnId: 'booth', searchKey: 'booth', type: 'array' },
       { columnId: 'role', searchKey: 'role', type: 'array' },
       { columnId: 'status', searchKey: 'status', type: 'array' },
     ],
@@ -104,6 +105,17 @@ export function AgentsTable({ data, search, navigate, isLoading }: DataTableProp
             options: [
               { label: 'VIUFinder', value: 'viufinder' },
               { label: 'VF XP', value: 'viufinder_xp' },
+            ],
+          },
+          {
+            columnId: 'booth',
+            title: 'Booth',
+            options: [
+              { label: 'King Padel Kemang', value: 'king_padel_kemang' },
+              { label: 'KYZN Kuningan', value: 'kyzn_kuningan' },
+              { label: 'Mr Padel Cipete', value: 'mr_padel_cipete' },
+              { label: 'Other', value: 'other' },
+              { label: 'All Booths', value: 'all' },
             ],
           },
           {

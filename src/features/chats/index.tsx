@@ -15,12 +15,14 @@ import {
   CheckCircle,
   RotateCcw,
   Paperclip,
+  Filter,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { useContacts, useResolveContact, useUnresolveContact, type Contact } from '@/api/contacts'
+import { useContacts, useResolveContact, useUnresolveContact, type Contact, type BoothTag } from '@/api/contacts'
 import { useAllAgents, useMyShiftStatus, type Agent } from '@/api/agents'
 import { useConversation, useSendMessage, useMarkAsRead, useDeleteChat, type Message } from '@/api/chat'
+import { useTags } from '@/api/tags'
 import { useWebSocket } from '@/hooks/use-websocket'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -36,6 +38,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
@@ -139,6 +153,8 @@ export function Chats() {
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [mobileSelectedContact, setMobileSelectedContact] = useState<Contact | null>(null)
   const [messageText, setMessageText] = useState('')
+  const [boothFilter, setBoothFilter] = useState<string>('')
+  const [tagFilter, setTagFilter] = useState<string>('')
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [activeTab, setActiveTab] = useState<'active' | 'resolved'>('active')
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -150,9 +166,17 @@ export function Chats() {
   const { data: shiftStatus } = useMyShiftStatus()
   const canSendMessages = shiftStatus?.can_send_messages ?? true
 
-  // Fetch contacts for the chat list
-  const { data: contacts, isLoading: contactsLoading } = useContacts()
+  // Fetch contacts for the chat list (with optional filters)
+  const contactFilters = useMemo(() => {
+    const filters: { booth_tag?: BoothTag; tag_id?: number } = {}
+    if (boothFilter) filters.booth_tag = boothFilter as BoothTag
+    if (tagFilter) filters.tag_id = parseInt(tagFilter, 10)
+    return filters
+  }, [boothFilter, tagFilter])
+
+  const { data: contacts, isLoading: contactsLoading } = useContacts(contactFilters)
   const { data: allAgents } = useAllAgents() // Fetch ALL agents for message sender lookup
+  const { data: allTags } = useTags() // Fetch all tags for filter dropdown
 
   const agentsById = useMemo(() => {
     const map = new Map<number, Agent>()
@@ -351,6 +375,75 @@ export function Chats() {
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
+
+              {/* Filters */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant='outline' size='sm' className='mt-2 w-full'>
+                    <Filter className='mr-2 h-4 w-4' />
+                    Filters
+                    {(boothFilter || tagFilter) && (
+                      <Badge variant='secondary' className='ml-2 h-5 px-1.5'>
+                        {(boothFilter ? 1 : 0) + (tagFilter ? 1 : 0)}
+                      </Badge>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className='w-64' align='start'>
+                  <div className='space-y-3'>
+                    <div>
+                      <label className='text-xs font-medium text-muted-foreground'>Booth</label>
+                      <Select value={boothFilter || '__all__'} onValueChange={(v) => setBoothFilter(v === '__all__' ? '' : v)}>
+                        <SelectTrigger className='mt-1 h-8'>
+                          <SelectValue placeholder='All booths' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value='__all__'>All booths</SelectItem>
+                          <SelectItem value='king_padel_kemang'>King Padel Kemang</SelectItem>
+                          <SelectItem value='kyzn_kuningan'>KYZN Kuningan</SelectItem>
+                          <SelectItem value='mr_padel_cipete'>Mr Padel Cipete</SelectItem>
+                          <SelectItem value='other'>Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className='text-xs font-medium text-muted-foreground'>Tag</label>
+                      <Select value={tagFilter || '__all__'} onValueChange={(v) => setTagFilter(v === '__all__' ? '' : v)}>
+                        <SelectTrigger className='mt-1 h-8'>
+                          <SelectValue placeholder='All tags' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value='__all__'>All tags</SelectItem>
+                          {allTags?.map((tag) => (
+                            <SelectItem key={tag.id} value={String(tag.id)}>
+                              <div className='flex items-center gap-2'>
+                                <span
+                                  className='h-2 w-2 rounded-full'
+                                  style={{ backgroundColor: tag.color }}
+                                />
+                                {tag.name}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {(boothFilter || tagFilter) && (
+                      <Button
+                        variant='ghost'
+                        size='sm'
+                        className='w-full'
+                        onClick={() => {
+                          setBoothFilter('')
+                          setTagFilter('')
+                        }}
+                      >
+                        Clear filters
+                      </Button>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
 
             <ScrollArea className='-mx-3 h-full overflow-scroll p-3'>

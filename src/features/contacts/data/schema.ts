@@ -26,6 +26,8 @@ export const contactSchema = z.object({
   booth_tag: boothTagSchema.nullable(),
   is_active: z.boolean(),
   is_resolved: z.boolean().optional(),
+  resolved_by_agent_id: z.number().nullable().optional(),
+  resolved_at: z.string().nullable().optional(),
   notes: z.string().nullable(),
   last_message_at: z.string().nullable(),
   unread_count: z.number().optional(),

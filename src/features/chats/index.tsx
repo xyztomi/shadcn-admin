@@ -77,6 +77,19 @@ const getMessageContent = (msg: Message): string => {
   return ''
 }
 
+const getResolvedByInfo = (
+  contact: Contact | null,
+  agentsById?: Map<number, Agent>
+): { name: string; time: string | null } | null => {
+  if (!contact?.is_resolved || !contact.resolved_by_agent_id) return null
+  const agent = agentsById?.get(contact.resolved_by_agent_id)
+  const name = agent?.full_name || agent?.username || 'Unknown agent'
+  const time = contact.resolved_at
+    ? format(new Date(contact.resolved_at), 'MMM d, HH:mm')
+    : null
+  return { name, time }
+}
+
 const getMessageSenderName = (
   msg: Message,
   currentUser: AuthUser | null,
@@ -510,6 +523,12 @@ export function Chats() {
                           <span className='text-xs text-muted-foreground'>
                             {safeFormat(contact.last_message_at, 'MMM d, HH:mm', 'No messages')}
                           </span>
+                          {contact.is_resolved && contact.resolved_by_agent_id && (
+                            <span className='text-xs text-green-600 flex items-center gap-1'>
+                              <CheckCircle className='h-3 w-3' />
+                              Resolved by {agentsById?.get(contact.resolved_by_agent_id)?.full_name || agentsById?.get(contact.resolved_by_agent_id)?.username || 'agent'}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </button>
@@ -609,6 +628,16 @@ export function Chats() {
                       {boothLabels[selectedContact.booth_tag] || selectedContact.booth_tag}
                     </Badge>
                   )}
+                  {(() => {
+                    const resolvedInfo = getResolvedByInfo(selectedContact, agentsById)
+                    return resolvedInfo ? (
+                      <Badge variant='outline' className='gap-1 text-green-600 border-green-600/50'>
+                        <CheckCircle className='h-3 w-3' />
+                        Resolved by {resolvedInfo.name}
+                        {resolvedInfo.time && ` • ${resolvedInfo.time}`}
+                      </Badge>
+                    ) : null
+                  })()}
                 </div>
               </div>
 

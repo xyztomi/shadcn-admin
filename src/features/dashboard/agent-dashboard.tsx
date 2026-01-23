@@ -2,7 +2,6 @@ import { Link } from '@tanstack/react-router'
 import {
   MessageSquare,
   CheckCircle2,
-  Clock,
   Star,
   Send,
   Users,
@@ -71,7 +70,7 @@ function StatCard({
   )
 }
 
-function formatResponseTime(seconds?: number | null): string {
+function _formatResponseTime(seconds?: number | null): string {
   if (!seconds) return '—'
   const minutes = Math.floor(seconds / 60)
   const remainingSeconds = Math.round(seconds % 60)

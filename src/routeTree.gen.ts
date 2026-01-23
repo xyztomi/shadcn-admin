@@ -46,6 +46,7 @@ import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_a
 import { Route as AuthenticatedDashboardAgentRouteImport } from './routes/_authenticated/dashboard/agent'
 import { Route as AuthenticatedDashboardAdminRouteImport } from './routes/_authenticated/dashboard/admin'
 import { Route as AuthenticatedDashboardAgentsAgentIdRouteImport } from './routes/_authenticated/dashboard/agents.$agentId'
+import { Route as AuthenticatedDashboardAgentAgentIdRouteImport } from './routes/_authenticated/dashboard/agent.$agentId'
 
 const ClerkRouteRoute = ClerkRouteRouteImport.update({
   id: '/clerk',
@@ -248,6 +249,12 @@ const AuthenticatedDashboardAgentsAgentIdRoute =
     path: '/dashboard/agents/$agentId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardAgentAgentIdRoute =
+  AuthenticatedDashboardAgentAgentIdRouteImport.update({
+    id: '/$agentId',
+    path: '/$agentId',
+    getParentRoute: () => AuthenticatedDashboardAgentRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/clerk': typeof ClerkAuthenticatedRouteRouteWithChildren
@@ -264,7 +271,7 @@ export interface FileRoutesByFullPath {
   '/503': typeof errors503Route
   '/': typeof AuthenticatedIndexRoute
   '/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
-  '/dashboard/agent': typeof AuthenticatedDashboardAgentRoute
+  '/dashboard/agent': typeof AuthenticatedDashboardAgentRouteWithChildren
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/settings/media-assets': typeof AuthenticatedSettingsMediaAssetsRoute
@@ -283,6 +290,7 @@ export interface FileRoutesByFullPath {
   '/interactive-message': typeof AuthenticatedInteractiveMessageIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/templates': typeof AuthenticatedTemplatesIndexRoute
+  '/dashboard/agent/$agentId': typeof AuthenticatedDashboardAgentAgentIdRoute
   '/dashboard/agents/$agentId': typeof AuthenticatedDashboardAgentsAgentIdRoute
 }
 export interface FileRoutesByTo {
@@ -299,7 +307,7 @@ export interface FileRoutesByTo {
   '/503': typeof errors503Route
   '/': typeof AuthenticatedIndexRoute
   '/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
-  '/dashboard/agent': typeof AuthenticatedDashboardAgentRoute
+  '/dashboard/agent': typeof AuthenticatedDashboardAgentRouteWithChildren
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/settings/media-assets': typeof AuthenticatedSettingsMediaAssetsRoute
@@ -318,6 +326,7 @@ export interface FileRoutesByTo {
   '/interactive-message': typeof AuthenticatedInteractiveMessageIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/templates': typeof AuthenticatedTemplatesIndexRoute
+  '/dashboard/agent/$agentId': typeof AuthenticatedDashboardAgentAgentIdRoute
   '/dashboard/agents/$agentId': typeof AuthenticatedDashboardAgentsAgentIdRoute
 }
 export interface FileRoutesById {
@@ -339,7 +348,7 @@ export interface FileRoutesById {
   '/(errors)/503': typeof errors503Route
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
-  '/_authenticated/dashboard/agent': typeof AuthenticatedDashboardAgentRoute
+  '/_authenticated/dashboard/agent': typeof AuthenticatedDashboardAgentRouteWithChildren
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/_authenticated/settings/media-assets': typeof AuthenticatedSettingsMediaAssetsRoute
@@ -358,6 +367,7 @@ export interface FileRoutesById {
   '/_authenticated/interactive-message/': typeof AuthenticatedInteractiveMessageIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/templates/': typeof AuthenticatedTemplatesIndexRoute
+  '/_authenticated/dashboard/agent/$agentId': typeof AuthenticatedDashboardAgentAgentIdRoute
   '/_authenticated/dashboard/agents/$agentId': typeof AuthenticatedDashboardAgentsAgentIdRoute
 }
 export interface FileRouteTypes {
@@ -396,6 +406,7 @@ export interface FileRouteTypes {
     | '/interactive-message'
     | '/settings/'
     | '/templates'
+    | '/dashboard/agent/$agentId'
     | '/dashboard/agents/$agentId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -431,6 +442,7 @@ export interface FileRouteTypes {
     | '/interactive-message'
     | '/settings'
     | '/templates'
+    | '/dashboard/agent/$agentId'
     | '/dashboard/agents/$agentId'
   id:
     | '__root__'
@@ -470,6 +482,7 @@ export interface FileRouteTypes {
     | '/_authenticated/interactive-message/'
     | '/_authenticated/settings/'
     | '/_authenticated/templates/'
+    | '/_authenticated/dashboard/agent/$agentId'
     | '/_authenticated/dashboard/agents/$agentId'
   fileRoutesById: FileRoutesById
 }
@@ -749,6 +762,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardAgentsAgentIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/agent/$agentId': {
+      id: '/_authenticated/dashboard/agent/$agentId'
+      path: '/$agentId'
+      fullPath: '/dashboard/agent/$agentId'
+      preLoaderRoute: typeof AuthenticatedDashboardAgentAgentIdRouteImport
+      parentRoute: typeof AuthenticatedDashboardAgentRoute
+    }
   }
 }
 
@@ -783,11 +803,26 @@ const AuthenticatedSettingsRouteRouteWithChildren =
     AuthenticatedSettingsRouteRouteChildren,
   )
 
+interface AuthenticatedDashboardAgentRouteChildren {
+  AuthenticatedDashboardAgentAgentIdRoute: typeof AuthenticatedDashboardAgentAgentIdRoute
+}
+
+const AuthenticatedDashboardAgentRouteChildren: AuthenticatedDashboardAgentRouteChildren =
+  {
+    AuthenticatedDashboardAgentAgentIdRoute:
+      AuthenticatedDashboardAgentAgentIdRoute,
+  }
+
+const AuthenticatedDashboardAgentRouteWithChildren =
+  AuthenticatedDashboardAgentRoute._addFileChildren(
+    AuthenticatedDashboardAgentRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedDashboardAdminRoute: typeof AuthenticatedDashboardAdminRoute
-  AuthenticatedDashboardAgentRoute: typeof AuthenticatedDashboardAgentRoute
+  AuthenticatedDashboardAgentRoute: typeof AuthenticatedDashboardAgentRouteWithChildren
   AuthenticatedAgentsIndexRoute: typeof AuthenticatedAgentsIndexRoute
   AuthenticatedBotHandlersIndexRoute: typeof AuthenticatedBotHandlersIndexRoute
   AuthenticatedBroadcastIndexRoute: typeof AuthenticatedBroadcastIndexRoute
@@ -802,7 +837,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedDashboardAdminRoute: AuthenticatedDashboardAdminRoute,
-  AuthenticatedDashboardAgentRoute: AuthenticatedDashboardAgentRoute,
+  AuthenticatedDashboardAgentRoute:
+    AuthenticatedDashboardAgentRouteWithChildren,
   AuthenticatedAgentsIndexRoute: AuthenticatedAgentsIndexRoute,
   AuthenticatedBotHandlersIndexRoute: AuthenticatedBotHandlersIndexRoute,
   AuthenticatedBroadcastIndexRoute: AuthenticatedBroadcastIndexRoute,

@@ -25,6 +25,8 @@ export interface Contact {
   booth_tag: BoothTag | null
   is_active: boolean
   is_resolved: boolean
+  resolved_by_agent_id: number | null
+  resolved_at: string | null
   notes: string | null
   last_message_at: string | null
   unread_count: number

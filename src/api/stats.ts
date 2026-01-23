@@ -136,3 +136,16 @@ export function useMyStats() {
     refetchInterval: 30 * 1000,
   })
 }
+
+// Get stats for a specific agent (admin only)
+export function useAgentDashboard(agentId: number | string) {
+  return useQuery({
+    queryKey: ['stats', 'agent', agentId],
+    queryFn: async (): Promise<MyStats> => {
+      const response = await api.get(`/stats/agent/${agentId}`)
+      return response.data
+    },
+    refetchInterval: 30 * 1000,
+    enabled: !!agentId,
+  })
+}

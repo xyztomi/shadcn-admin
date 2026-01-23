@@ -58,8 +58,12 @@ function ActivityTooltip({ active, payload }: ActivityTooltipProps) {
   )
 }
 
-export function AnalyticsChart() {
-  const { data: messagesByDate, isLoading } = useMessagesByDate(7)
+interface AnalyticsChartProps {
+  agentId?: number | string
+}
+
+export function AnalyticsChart({ agentId }: AnalyticsChartProps = {}) {
+  const { data: messagesByDate, isLoading } = useMessagesByDate(7, agentId)
 
   const chartData = useMemo<ChartPoint[]>(() => {
     return (

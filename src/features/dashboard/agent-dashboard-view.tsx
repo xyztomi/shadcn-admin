@@ -10,6 +10,7 @@ import {
   ArrowRight,
   CalendarClock,
   AlertTriangle,
+  ArrowLeft,
 } from 'lucide-react'
 import {
   Card,
@@ -21,14 +22,12 @@ import {
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-// import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { useMyStats } from '@/api/stats'
-// import { useUpdateAvailability } from '@/api/agents'
+import type { MyStats } from '@/api/stats'
 import { AnalyticsChart } from './components/analytics-chart'
 
 function StatCard({
@@ -81,14 +80,19 @@ function formatResponseTime(seconds?: number | null): string {
   return `${minutes}m ${remainingSeconds}s`
 }
 
-export function AgentDashboard() {
-  const { data: stats, isLoading } = useMyStats()
-  // const updateAvailability = useUpdateAvailability()
+interface AgentDashboardViewProps {
+  stats: MyStats | undefined
+  isLoading: boolean
+  isAdminView?: boolean
+  agentId?: number | string
+}
 
-  // const handleAvailabilityToggle = (checked: boolean) => {
-  //   updateAvailability.mutate({ is_available: checked })
-  // }
-
+export function AgentDashboardView({
+  stats,
+  isLoading,
+  isAdminView = false,
+  agentId,
+}: AgentDashboardViewProps) {
   const departmentLabel =
     stats?.agent.department === 'viufinder_xp' ? 'Viufinder XP' : 'Viufinder'
 
@@ -101,7 +105,17 @@ export function AgentDashboard() {
     <>
       <Header>
         <div className='flex items-center gap-3'>
-          <h1 className='text-lg font-semibold'>Dashboard</h1>
+          {isAdminView && (
+            <Button variant='ghost' size='sm' asChild>
+              <Link to='/dashboard/admin'>
+                <ArrowLeft className='mr-1 h-4 w-4' />
+                Back
+              </Link>
+            </Button>
+          )}
+          <h1 className='text-lg font-semibold'>
+            {isAdminView ? `Agent Dashboard: ${stats?.agent.full_name || stats?.agent.username || 'Loading...'}` : 'Dashboard'}
+          </h1>
           {stats && (
             <>
               <Badge variant={stats.agent.is_online ? 'default' : 'secondary'}>
@@ -130,28 +144,17 @@ export function AgentDashboard() {
               <h2 className='text-2xl font-bold'>
                 {isLoading ? (
                   <Skeleton className='h-8 w-48' />
+                ) : isAdminView ? (
+                  `${stats?.agent.full_name || stats?.agent.username}'s Dashboard`
                 ) : (
                   `Welcome back, ${stats?.agent.full_name || stats?.agent.username}!`
                 )}
               </h2>
               <p className='text-muted-foreground'>
-                {departmentLabel} • {shiftName} • Here's your performance today
+                {departmentLabel} • {shiftName} • {isAdminView ? 'Performance overview' : 'Here\'s your performance today'}
               </p>
             </div>
             <div className='flex flex-wrap gap-4'>
-              {/* <Card className='flex items-center gap-4 p-4'>
-                <div>
-                  <p className='text-sm font-medium'>Available for chats</p>
-                  <p className='text-xs text-muted-foreground'>
-                    Toggle to receive new assignments
-                  </p>
-                </div>
-                <Switch
-                  checked={stats?.agent.is_available ?? false}
-                  onCheckedChange={handleAvailabilityToggle}
-                  disabled={isLoading || updateAvailability.isPending}
-                />
-              </Card> */}
               {/* Shift Status Card */}
               <Card className='flex items-center gap-4 p-4'>
                 <CalendarClock className='h-8 w-8 text-muted-foreground' />
@@ -179,10 +182,10 @@ export function AgentDashboard() {
           {!isInShift && stats?.shift && (
             <Alert variant='destructive'>
               <AlertTriangle className='h-4 w-4' />
-              <AlertTitle>You are outside your shift hours</AlertTitle>
+              <AlertTitle>{isAdminView ? 'Agent is outside shift hours' : 'You are outside your shift hours'}</AlertTitle>
               <AlertDescription>
-                Your shift ({stats.shift.name}) is from {stats.shift.start_time} to {stats.shift.end_time}.
-                Message sending is disabled until your shift begins.
+                {isAdminView ? 'This agent\'s' : 'Your'} shift ({stats.shift.name}) is from {stats.shift.start_time} to {stats.shift.end_time}.
+                {!isAdminView && ' Message sending is disabled until your shift begins.'}
               </AlertDescription>
             </Alert>
           )}
@@ -194,7 +197,7 @@ export function AgentDashboard() {
               <StatCard
                 title='Active Conversations'
                 value={stats?.current.active_conversations ?? 0}
-                description='Currently assigned to you'
+                description={isAdminView ? 'Currently assigned' : 'Currently assigned to you'}
                 icon={MessageSquare}
                 isLoading={isLoading}
               />
@@ -231,7 +234,7 @@ export function AgentDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle>This Week</CardTitle>
-                <CardDescription>Your performance over the last 7 days</CardDescription>
+                <CardDescription>{isAdminView ? 'Agent\'s performance over the last 7 days' : 'Your performance over the last 7 days'}</CardDescription>
               </CardHeader>
               <CardContent>
                 {isLoading ? (
@@ -268,7 +271,7 @@ export function AgentDashboard() {
                       </div>
                       <p className='text-2xl font-bold'>{stats?.week.resolved ?? 0}</p>
                     </div>
-                    {/* <div className='flex items-center justify-between rounded-lg border p-4'>
+                    <div className='flex items-center justify-between rounded-lg border p-4'>
                       <div className='flex items-center gap-3'>
                         <Clock className='h-5 w-5 text-muted-foreground' />
                         <div>
@@ -281,7 +284,7 @@ export function AgentDashboard() {
                       <p className='text-2xl font-bold'>
                         {formatResponseTime(stats?.week.avg_response_time)}
                       </p>
-                    </div> */}
+                    </div>
                   </div>
                 )}
               </CardContent>
@@ -290,7 +293,7 @@ export function AgentDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle>All-Time Stats</CardTitle>
-                <CardDescription>Your lifetime performance</CardDescription>
+                <CardDescription>{isAdminView ? 'Agent\'s lifetime performance' : 'Your lifetime performance'}</CardDescription>
               </CardHeader>
               <CardContent>
                 {isLoading ? (
@@ -343,33 +346,35 @@ export function AgentDashboard() {
               <CardDescription>Last 7 days messaging volume</CardDescription>
             </CardHeader>
             <CardContent>
-              <AnalyticsChart />
+              <AnalyticsChart agentId={agentId} />
             </CardContent>
           </Card>
 
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className='flex flex-wrap gap-3'>
-                <Button asChild>
-                  <Link to='/chats'>
-                    <MessageSquare className='mr-2 h-4 w-4' />
-                    Open Chats
-                    <ArrowRight className='ml-2 h-4 w-4' />
-                  </Link>
-                </Button>
-                <Button variant='outline' asChild>
-                  <Link to='/contacts'>
-                    <Users className='mr-2 h-4 w-4' />
-                    View Contacts
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Quick Actions - only show for personal dashboard */}
+          {!isAdminView && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className='flex flex-wrap gap-3'>
+                  <Button asChild>
+                    <Link to='/chats'>
+                      <MessageSquare className='mr-2 h-4 w-4' />
+                      Open Chats
+                      <ArrowRight className='ml-2 h-4 w-4' />
+                    </Link>
+                  </Button>
+                  <Button variant='outline' asChild>
+                    <Link to='/contacts'>
+                      <Users className='mr-2 h-4 w-4' />
+                      View Contacts
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </Main>
     </>

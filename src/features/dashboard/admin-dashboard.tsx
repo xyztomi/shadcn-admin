@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import {
   MessageSquare,
   Users,
@@ -5,6 +6,7 @@ import {
   // AlertCircle,
   Headphones,
   CalendarClock,
+  ExternalLink,
 } from 'lucide-react'
 import {
   Card,
@@ -308,9 +310,11 @@ export function AdminDashboard() {
                 ) : (
                   <div className='space-y-3'>
                     {agentStats?.slice(0, 5).map((agent) => (
-                      <div
+                      <Link
                         key={agent.id}
-                        className='flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3'
+                        to='/dashboard/agents/$agentId'
+                        params={{ agentId: String(agent.id) }}
+                        className='flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3 transition-colors hover:bg-muted/50'
                       >
                         <div className='flex items-center gap-3'>
                           <div>
@@ -343,17 +347,20 @@ export function AdminDashboard() {
                             </p>
                           </div>
                         </div>
-                        <div className='text-right text-xs text-muted-foreground'>
-                          <p className='text-sm font-semibold'>
-                            {(agent.resolved_today ?? 0).toLocaleString()} resolved
-                          </p>
-                          <p>
-                            {typeof agent.avg_response_time === 'number'
-                              ? `${Math.max(0, Math.round(agent.avg_response_time / 60))}m avg`
-                              : '—'}
-                          </p>
+                        <div className='flex items-center gap-4'>
+                          <div className='text-right text-xs text-muted-foreground'>
+                            <p className='text-sm font-semibold'>
+                              {(agent.resolved_today ?? 0).toLocaleString()} resolved
+                            </p>
+                            <p>
+                              {typeof agent.avg_response_time === 'number'
+                                ? `${Math.max(0, Math.round(agent.avg_response_time / 60))}m avg`
+                                : '—'}
+                            </p>
+                          </div>
+                          <ExternalLink className='h-4 w-4 text-muted-foreground' />
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 )}

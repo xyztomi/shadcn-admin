@@ -45,6 +45,7 @@ import { Route as AuthenticatedSettingsDisplayRouteImport } from './routes/_auth
 import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
 import { Route as AuthenticatedDashboardAgentRouteImport } from './routes/_authenticated/dashboard/agent'
 import { Route as AuthenticatedDashboardAdminRouteImport } from './routes/_authenticated/dashboard/admin'
+import { Route as AuthenticatedDashboardAgentsAgentIdRouteImport } from './routes/_authenticated/dashboard/agents.$agentId'
 
 const ClerkRouteRoute = ClerkRouteRouteImport.update({
   id: '/clerk',
@@ -241,6 +242,12 @@ const AuthenticatedDashboardAdminRoute =
     path: '/dashboard/admin',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardAgentsAgentIdRoute =
+  AuthenticatedDashboardAgentsAgentIdRouteImport.update({
+    id: '/dashboard/agents/$agentId',
+    path: '/dashboard/agents/$agentId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/clerk': typeof ClerkAuthenticatedRouteRouteWithChildren
@@ -276,6 +283,7 @@ export interface FileRoutesByFullPath {
   '/interactive-message': typeof AuthenticatedInteractiveMessageIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/templates': typeof AuthenticatedTemplatesIndexRoute
+  '/dashboard/agents/$agentId': typeof AuthenticatedDashboardAgentsAgentIdRoute
 }
 export interface FileRoutesByTo {
   '/clerk': typeof ClerkAuthenticatedRouteRouteWithChildren
@@ -310,6 +318,7 @@ export interface FileRoutesByTo {
   '/interactive-message': typeof AuthenticatedInteractiveMessageIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/templates': typeof AuthenticatedTemplatesIndexRoute
+  '/dashboard/agents/$agentId': typeof AuthenticatedDashboardAgentsAgentIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -349,6 +358,7 @@ export interface FileRoutesById {
   '/_authenticated/interactive-message/': typeof AuthenticatedInteractiveMessageIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/templates/': typeof AuthenticatedTemplatesIndexRoute
+  '/_authenticated/dashboard/agents/$agentId': typeof AuthenticatedDashboardAgentsAgentIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -386,6 +396,7 @@ export interface FileRouteTypes {
     | '/interactive-message'
     | '/settings/'
     | '/templates'
+    | '/dashboard/agents/$agentId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/clerk'
@@ -420,6 +431,7 @@ export interface FileRouteTypes {
     | '/interactive-message'
     | '/settings'
     | '/templates'
+    | '/dashboard/agents/$agentId'
   id:
     | '__root__'
     | '/_authenticated'
@@ -458,6 +470,7 @@ export interface FileRouteTypes {
     | '/_authenticated/interactive-message/'
     | '/_authenticated/settings/'
     | '/_authenticated/templates/'
+    | '/_authenticated/dashboard/agents/$agentId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -729,6 +742,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/agents/$agentId': {
+      id: '/_authenticated/dashboard/agents/$agentId'
+      path: '/dashboard/agents/$agentId'
+      fullPath: '/dashboard/agents/$agentId'
+      preLoaderRoute: typeof AuthenticatedDashboardAgentsAgentIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -775,6 +795,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedContactsIndexRoute: typeof AuthenticatedContactsIndexRoute
   AuthenticatedInteractiveMessageIndexRoute: typeof AuthenticatedInteractiveMessageIndexRoute
   AuthenticatedTemplatesIndexRoute: typeof AuthenticatedTemplatesIndexRoute
+  AuthenticatedDashboardAgentsAgentIdRoute: typeof AuthenticatedDashboardAgentsAgentIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -790,6 +811,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInteractiveMessageIndexRoute:
     AuthenticatedInteractiveMessageIndexRoute,
   AuthenticatedTemplatesIndexRoute: AuthenticatedTemplatesIndexRoute,
+  AuthenticatedDashboardAgentsAgentIdRoute:
+    AuthenticatedDashboardAgentsAgentIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

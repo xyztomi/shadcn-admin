@@ -117,13 +117,20 @@ export function useAnalyticsOverview(startDate?: string, endDate?: string) {
 }
 
 // Message Analytics - By Date
-export function useMessagesByDate(days = 30) {
+export function useMessagesByDate(days = 30, agentId?: number | string) {
   const { selectedDepartment } = useDepartmentStore()
   return useQuery({
-    queryKey: ['analytics', 'messages-by-date', days, selectedDepartment],
+    queryKey: [
+      'analytics',
+      'messages-by-date',
+      days,
+      selectedDepartment,
+      agentId,
+    ],
     queryFn: async (): Promise<MessageByDate[]> => {
       const params = new URLSearchParams({ days: String(days) })
       if (selectedDepartment) params.append('department', selectedDepartment)
+      if (agentId) params.append('agent_id', String(agentId))
       const response = await api.get(
         `/analytics/messages/by-date?${params.toString()}`
       )

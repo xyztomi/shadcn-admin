@@ -30,6 +30,7 @@ import type { Tag } from '@/types'
 interface TagSelectorProps {
   waId: string
   className?: string
+  disabled?: boolean
 }
 
 const TAG_COLORS = [
@@ -43,7 +44,7 @@ const TAG_COLORS = [
   '#ec4899', // pink
 ]
 
-export function TagSelector({ waId, className }: TagSelectorProps) {
+export function TagSelector({ waId, className, disabled = false }: TagSelectorProps) {
   const [open, setOpen] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
   const [newTagName, setNewTagName] = useState('')
@@ -102,9 +103,9 @@ export function TagSelector({ waId, className }: TagSelectorProps) {
           {tag.name}
           <button
             type='button'
-            className='ml-0.5 rounded-full p-0.5 hover:bg-muted-foreground/20'
+            className='ml-0.5 rounded-full p-0.5 hover:bg-muted-foreground/20 disabled:opacity-50 disabled:cursor-not-allowed'
             onClick={() => removeTag.mutate({ waId, tagId: tag.id })}
-            disabled={removeTag.isPending}
+            disabled={removeTag.isPending || disabled}
           >
             <X className='h-3 w-3' />
           </button>
@@ -112,12 +113,13 @@ export function TagSelector({ waId, className }: TagSelectorProps) {
       ))}
 
       {/* Add tag button */}
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={(o) => !disabled && setOpen(o)}>
         <PopoverTrigger asChild>
           <Button
             variant='ghost'
             size='sm'
             className='h-6 px-2 text-xs text-muted-foreground'
+            disabled={disabled}
           >
             <Plus className='h-3 w-3 mr-1' />
             Tag

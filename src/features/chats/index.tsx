@@ -57,6 +57,12 @@ import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { useAuthStore, type AuthUser } from '@/stores/auth-store'
 import { MessageStatusIcon } from './components/message-status-icon'
 import { TagSelector } from './components/tag-selector'
@@ -178,6 +184,10 @@ export function Chats() {
   // Fetch shift status
   const { data: shiftStatus } = useMyShiftStatus()
   const canSendMessages = shiftStatus?.can_send_messages ?? true
+  // Agents can only perform actions (resolve, update, etc.) when in shift
+  // Admins/superusers can always perform actions
+  const isInShift = shiftStatus?.is_in_shift ?? true
+  const canPerformActions = isAdmin || isInShift
 
   // Fetch contacts for the chat list (with optional filters)
   const contactFilters = useMemo(() => {
@@ -577,28 +587,41 @@ export function Chats() {
                   </div>
                   <div className='flex items-center gap-2'>
                     {/* Resolve/Unresolve button */}
-                    {selectedContact.is_resolved ? (
-                      <Button
-                        size='sm'
-                        variant='outline'
-                        onClick={handleUnresolve}
-                        disabled={unresolveMutation.isPending}
-                      >
-                        <RotateCcw className='mr-2 h-4 w-4' />
-                        Reopen
-                      </Button>
-                    ) : (
-                      <Button
-                        size='sm'
-                        variant='default'
-                        onClick={handleResolve}
-                        disabled={resolveMutation.isPending}
-                        className='bg-green-600 hover:bg-green-700'
-                      >
-                        <CheckCircle className='mr-2 h-4 w-4' />
-                        Resolve
-                      </Button>
-                    )}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className='inline-flex'>
+                            {selectedContact.is_resolved ? (
+                              <Button
+                                size='sm'
+                                variant='outline'
+                                onClick={handleUnresolve}
+                                disabled={unresolveMutation.isPending || !canPerformActions}
+                              >
+                                <RotateCcw className='mr-2 h-4 w-4' />
+                                Reopen
+                              </Button>
+                            ) : (
+                              <Button
+                                size='sm'
+                                variant='default'
+                                onClick={handleResolve}
+                                disabled={resolveMutation.isPending || !canPerformActions}
+                                className='bg-green-600 hover:bg-green-700'
+                              >
+                                <CheckCircle className='mr-2 h-4 w-4' />
+                                Resolve
+                              </Button>
+                            )}
+                          </span>
+                        </TooltipTrigger>
+                        {!canPerformActions && (
+                          <TooltipContent>
+                            <p>You can only perform this action during your shift hours</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
                     {isAdmin && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -621,7 +644,7 @@ export function Chats() {
                 </div>
                 {/* Tags */}
                 <div className='mt-2 ps-12 lg:ps-16 flex items-center gap-2 flex-wrap'>
-                  <TagSelector waId={selectedContact.wa_id} />
+                  <TagSelector waId={selectedContact.wa_id} disabled={!canPerformActions} />
                   {selectedContact.booth_tag && (
                     <Badge variant='secondary' className='gap-1'>
                       <MapPin className='h-3 w-3' />
@@ -747,12 +770,12 @@ export function Chats() {
                 </div>
 
                 {/* Shift Warning */}
-                {!canSendMessages && shiftStatus?.shift && (
+                {!isInShift && !isAdmin && shiftStatus?.shift && (
                   <Alert variant='destructive' className='mb-2'>
                     <Clock className='h-4 w-4' />
                     <AlertDescription>
                       You are outside your shift hours ({shiftStatus.shift.start_time} - {shiftStatus.shift.end_time}).
-                      Message sending is disabled.
+                      Message sending and chat actions (resolve, tagging) are disabled.
                     </AlertDescription>
                   </Alert>
                 )}

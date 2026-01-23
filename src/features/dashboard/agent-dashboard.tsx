@@ -6,7 +6,6 @@ import {
   Star,
   Send,
   Users,
-  AlertCircle,
   ArrowRight,
   CalendarClock,
   AlertTriangle,
@@ -212,16 +211,6 @@ export function AgentDashboard() {
                 description='Outbound messages today'
                 icon={Send}
                 isLoading={isLoading}
-              />
-              <StatCard
-                title='Department Queue'
-                value={stats?.current.department_queue ?? 0}
-                description='Waiting for assignment'
-                icon={AlertCircle}
-                isLoading={isLoading}
-                variant={
-                  (stats?.current.department_queue ?? 0) > 10 ? 'warning' : 'default'
-                }
               />
             </div>
           </div>

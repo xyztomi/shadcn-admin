@@ -190,7 +190,6 @@ export function AdminDashboard() {
               <StatCard
                 title='Active Conversations'
                 value={formatNumber(activeConversations)}
-                description={`${formatNumber(pendingConversations)} pending`}
                 icon={MessageSquare}
                 isLoading={statsLoading || analyticsLoading}
               />

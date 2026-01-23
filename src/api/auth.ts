@@ -83,7 +83,7 @@ export function useChangePassword() {
       current_password: string
       new_password: string
     }) => {
-      const response = await api.post('/auth/change-password', data)
+      const response = await api.post('/auth/me/change-password', data)
       return response.data
     },
   })

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/auth-store'
+import { unreadStore } from '@/stores/unread-store'
 
 type WebSocketEventType =
   | 'connected'
@@ -94,14 +95,14 @@ export function useWebSocket(onEvent?: WSEventHandler) {
   const onEventRef = useRef(onEvent)
   const queryClient = useQueryClient()
   const queryClientRef = useRef(queryClient)
-  const { auth } = useAuthStore()
 
   // Keep refs updated
   onEventRef.current = onEvent
   queryClientRef.current = queryClient
 
   const connect = useCallback(() => {
-    if (!auth.accessToken) return
+    const token = useAuthStore.getState().auth.accessToken
+    if (!token) return
 
     // Don't create multiple connections
     if (globalWs && globalWs.readyState === WebSocket.OPEN) {
@@ -114,7 +115,7 @@ export function useWebSocket(onEvent?: WSEventHandler) {
       globalWs = null
     }
 
-    const wsUrl = getWebSocketUrl(auth.accessToken)
+    const wsUrl = getWebSocketUrl(token)
     globalWs = new WebSocket(wsUrl)
 
     globalWs.onopen = () => {
@@ -140,6 +141,11 @@ export function useWebSocket(onEvent?: WSEventHandler) {
             })
             qc.invalidateQueries({ queryKey: ['contacts'] })
             qc.invalidateQueries({ queryKey: ['chat', 'unread-summary'] })
+
+            // Instantly update unread store for inbound messages
+            if (msgEvent.message?.direction === 'inbound') {
+              unreadStore.incrementUnread(msgEvent.wa_id)
+            }
             break
           }
           case 'message_status': {
@@ -213,27 +219,43 @@ export function useWebSocket(onEvent?: WSEventHandler) {
         }, 5000)
       }
     }
-  }, [auth.accessToken])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // No dependencies - connect reads from refs and store
 
+  // Connect on mount - use ref to track if component is still mounted
   useEffect(() => {
+    let isMounted = true
     connectionCount++
-    connect()
+
+    // Delay connection to let StrictMode double-mount settle
+    // StrictMode: mount -> unmount -> mount happens synchronously
+    // So by the time setTimeout fires, we know the final mount state
+    const connectTimeout = setTimeout(() => {
+      if (isMounted && connectionCount > 0) {
+        connect()
+      }
+    }, 100)
 
     return () => {
+      isMounted = false
       connectionCount--
+      clearTimeout(connectTimeout)
+
       // Only close WebSocket when no components are using it
-      if (connectionCount === 0) {
-        if (globalReconnectTimeout) {
-          clearTimeout(globalReconnectTimeout)
-          globalReconnectTimeout = null
-        }
-        if (globalWs) {
+      // Use setTimeout to allow for StrictMode remount
+      setTimeout(() => {
+        if (connectionCount === 0 && globalWs) {
+          if (globalReconnectTimeout) {
+            clearTimeout(globalReconnectTimeout)
+            globalReconnectTimeout = null
+          }
           globalWs.close()
           globalWs = null
         }
-      }
+      }, 100)
     }
-  }, [connect])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Empty deps - singleton pattern handles reconnects
 
   const send = useCallback((data: unknown) => {
     if (globalWs?.readyState === WebSocket.OPEN) {

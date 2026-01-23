@@ -1,3 +1,4 @@
+import { useSyncExternalStore } from 'react'
 import {
   useQuery,
   useMutation,
@@ -12,6 +13,7 @@ import {
   MessageStatus,
 } from '@/types'
 import { useDepartmentStore } from '@/stores/department-store'
+import { unreadStore } from '@/stores/unread-store'
 import { api } from './client'
 
 // Re-export for convenience
@@ -86,10 +88,16 @@ export function useMarkAsRead() {
       const response = await api.post(`/chat/${waId}/mark-read`)
       return response.data
     },
-    onSuccess: (_data, waId) => {
+    onSuccess: (data, waId) => {
       queryClient.invalidateQueries({ queryKey: ['contacts'] })
       queryClient.invalidateQueries({ queryKey: ['conversation', waId] })
       queryClient.invalidateQueries({ queryKey: ['chat', 'unread-summary'] })
+
+      // Instantly update unread store
+      const markedCount = data?.marked_read ?? 1
+      if (markedCount > 0) {
+        unreadStore.decrementUnread(markedCount)
+      }
     },
   })
 }
@@ -122,10 +130,12 @@ export function useDeleteChat() {
 }
 
 // Aggregated unread counts for nav badge + notifications
+// Uses useSyncExternalStore for instant WebSocket updates + REST API for sync
 export function useUnreadSummary() {
   const { selectedDepartment } = useDepartmentStore()
 
-  return useQuery({
+  // REST API query to sync the store periodically
+  useQuery({
     queryKey: ['chat', 'unread-summary', selectedDepartment],
     queryFn: async (): Promise<UnreadSummary> => {
       const params = new URLSearchParams()
@@ -137,9 +147,25 @@ export function useUnreadSummary() {
       const response = await api.get(
         `/chat/unread-summary${queryString ? `?${queryString}` : ''}`
       )
+      // Sync the external store with REST data
+      unreadStore.syncFromApi(response.data)
       return response.data
     },
     refetchInterval: 15_000,
     refetchOnWindowFocus: true,
   })
+
+  // Subscribe to real-time store updates (instant WebSocket changes)
+  const snapshot = useSyncExternalStore(
+    unreadStore.subscribe,
+    unreadStore.getSnapshot,
+    unreadStore.getServerSnapshot
+  )
+
+  return {
+    data: {
+      total_unread_messages: snapshot.totalUnreadMessages,
+      contacts_with_unread: snapshot.contactsWithUnread,
+    } as UnreadSummary,
+  }
 }

@@ -11,6 +11,7 @@ import {
   MessageType,
   MessageStatus,
 } from '@/types'
+import { useDepartmentStore } from '@/stores/department-store'
 import { api } from './client'
 
 // Re-export for convenience
@@ -20,6 +21,11 @@ export { MessageDirection, MessageType, MessageStatus }
 export interface ConversationResponse {
   messages: Message[]
   has_more: boolean
+}
+
+export interface UnreadSummary {
+  total_unread_messages: number
+  contacts_with_unread: number
 }
 
 // Get conversation history with cursor-based pagination
@@ -83,6 +89,7 @@ export function useMarkAsRead() {
     onSuccess: (_data, waId) => {
       queryClient.invalidateQueries({ queryKey: ['contacts'] })
       queryClient.invalidateQueries({ queryKey: ['conversation', waId] })
+      queryClient.invalidateQueries({ queryKey: ['chat', 'unread-summary'] })
     },
   })
 }
@@ -111,5 +118,28 @@ export function useDeleteChat() {
       queryClient.invalidateQueries({ queryKey: ['contacts'] })
       queryClient.invalidateQueries({ queryKey: ['conversation', waId] })
     },
+  })
+}
+
+// Aggregated unread counts for nav badge + notifications
+export function useUnreadSummary() {
+  const { selectedDepartment } = useDepartmentStore()
+
+  return useQuery({
+    queryKey: ['chat', 'unread-summary', selectedDepartment],
+    queryFn: async (): Promise<UnreadSummary> => {
+      const params = new URLSearchParams()
+      if (selectedDepartment && selectedDepartment !== 'all') {
+        params.append('department', selectedDepartment)
+      }
+
+      const queryString = params.toString()
+      const response = await api.get(
+        `/chat/unread-summary${queryString ? `?${queryString}` : ''}`
+      )
+      return response.data
+    },
+    refetchInterval: 15_000,
+    refetchOnWindowFocus: true,
   })
 }

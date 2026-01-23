@@ -3,15 +3,20 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/auth-store'
 
 type WebSocketEventType =
+  | 'connected'
+  | 'contact_update'
   | 'new_message'
   | 'message_status'
   | 'message_status_update'
   | 'agent_assigned'
   | 'typing'
+  | 'pong'
 
 interface WebSocketEvent {
   type: WebSocketEventType
   data?: unknown
+  wa_id?: string
+  message?: NewMessagePayload
   // Direct fields for message_status_update events
   message_id?: number
   wa_message_id?: string
@@ -20,18 +25,24 @@ interface WebSocketEvent {
   error?: string
 }
 
-interface NewMessageEvent {
-  type: 'new_message'
-  data: {
-    wa_id: string
-    message: {
-      id: number
-      content: string
-      direction: 'inbound' | 'outbound'
-      timestamp: string
-    }
-  }
+interface NewMessagePayload {
+  id: number | string
+  content?: string
+  direction: 'inbound' | 'outbound'
+  timestamp?: string
+  created_at?: string
+  sender_name?: string
+  service_tag?: string
+  is_bot?: boolean
 }
+
+interface NewMessageEvent extends WebSocketEvent {
+  type: 'new_message'
+  wa_id: string
+  message: NewMessagePayload
+}
+
+export type { WebSocketEvent, NewMessageEvent }
 
 interface MessageStatusEvent {
   type: 'message_status'
@@ -125,9 +136,10 @@ export function useWebSocket(onEvent?: WSEventHandler) {
             const msgEvent = data as NewMessageEvent
             // Invalidate conversation and contacts queries
             qc.invalidateQueries({
-              queryKey: ['conversation', msgEvent.data.wa_id],
+              queryKey: ['conversation', msgEvent.wa_id],
             })
             qc.invalidateQueries({ queryKey: ['contacts'] })
+            qc.invalidateQueries({ queryKey: ['chat', 'unread-summary'] })
             break
           }
           case 'message_status': {

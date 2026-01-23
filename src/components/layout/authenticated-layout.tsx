@@ -6,6 +6,7 @@ import { SearchProvider } from '@/context/search-provider'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { SkipToMain } from '@/components/skip-to-main'
+import { ChatNotificationListener } from '@/components/notifications/chat-notification-listener'
 
 type AuthenticatedLayoutProps = {
   children?: React.ReactNode
@@ -18,6 +19,7 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
       <LayoutProvider>
         <SidebarProvider defaultOpen={defaultOpen}>
           <SkipToMain />
+          <ChatNotificationListener />
           <AppSidebar />
           <SidebarInset
             className={cn(

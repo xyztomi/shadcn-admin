@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useLayout } from '@/context/layout-provider'
 import { useAuthStore } from '@/stores/auth-store'
+import { useUnreadSummary } from '@/api/chat'
 import {
   Sidebar,
   SidebarContent,
@@ -40,12 +41,30 @@ export function AppSidebar() {
   const { collapsible, variant } = useLayout()
   const { auth } = useAuthStore()
   const userRole = auth.user?.role as UserRole | undefined
+  const { data: unreadSummary } = useUnreadSummary()
 
   // Filter sidebar based on user role
   const filteredNavGroups = useMemo(
     () => filterNavByRole(sidebarData.navGroups, userRole),
     [userRole]
   )
+
+  const navGroupsWithBadges = useMemo(() => {
+    const unreadCount = unreadSummary?.contacts_with_unread ?? 0
+
+    return filteredNavGroups.map((group) => ({
+      ...group,
+      items: group.items.map((item) => {
+        if (item.title === 'Chats') {
+          return {
+            ...item,
+            badge: unreadCount > 0 ? String(unreadCount) : undefined,
+          }
+        }
+        return item
+      }),
+    }))
+  }, [filteredNavGroups, unreadSummary?.contacts_with_unread])
 
   return (
     <Sidebar collapsible={collapsible} variant={variant}>
@@ -57,7 +76,7 @@ export function AppSidebar() {
         {/* <AppTitle /> */}
       </SidebarHeader>
       <SidebarContent>
-        {filteredNavGroups.map((props) => (
+        {navGroupsWithBadges.map((props) => (
           <NavGroup key={props.title} {...props} />
         ))}
       </SidebarContent>

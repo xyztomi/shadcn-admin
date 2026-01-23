@@ -31,6 +31,7 @@ import { useAnalyticsOverview, useDepartmentsSummary } from '@/api/analytics'
 import { Analytics } from './components/analytics'
 import { Overview } from './components/overview'
 import { ReportsPanel } from './components/reports'
+import { ComplaintRateAnalytics } from './components/complaint-rate-analytics'
 
 function StatCard({
   title,
@@ -368,6 +369,7 @@ export function AdminDashboard() {
           </TabsContent>
           <TabsContent value='analytics' className='space-y-4'>
             <Analytics />
+            <ComplaintRateAnalytics />
           </TabsContent>
           <TabsContent value='reports' className='space-y-4'>
             <ReportsPanel />

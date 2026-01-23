@@ -11,6 +11,7 @@ import {
   MessageDirection,
   MessageType,
   MessageStatus,
+  MessageSentiment,
 } from '@/types'
 import { useDepartmentStore } from '@/stores/department-store'
 import { unreadStore } from '@/stores/unread-store'
@@ -18,7 +19,7 @@ import { api } from './client'
 
 // Re-export for convenience
 export type { Message }
-export { MessageDirection, MessageType, MessageStatus }
+export { MessageDirection, MessageType, MessageStatus, MessageSentiment }
 
 export interface ConversationResponse {
   messages: Message[]
@@ -168,4 +169,102 @@ export function useUnreadSummary() {
       contacts_with_unread: snapshot.contactsWithUnread,
     } as UnreadSummary,
   }
+}
+
+// ============ Message Sentiment Tagging ============
+
+export interface SentimentTagResponse {
+  id: number
+  sentiment: MessageSentiment | null
+  sentiment_tagged_by: number | null
+  sentiment_tagged_at: string | null
+}
+
+// Tag a message with sentiment (complaint, compliment, etc.)
+export function useTagMessageSentiment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({
+      messageId,
+      sentiment,
+    }: {
+      messageId: string | number
+      sentiment: MessageSentiment
+    }): Promise<SentimentTagResponse> => {
+      const response = await api.patch(`/messages/${messageId}/sentiment`, {
+        sentiment,
+      })
+      return response.data
+    },
+    onSuccess: (data) => {
+      // Update the message in the cache directly for immediate UI feedback
+      queryClient.setQueriesData<InfiniteData<ConversationResponse>>(
+        { queryKey: ['conversation'] },
+        (oldData) => {
+          if (!oldData) return oldData
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              messages: page.messages.map((msg) =>
+                String(msg.id) === String(data.id)
+                  ? {
+                      ...msg,
+                      sentiment: data.sentiment,
+                      sentiment_tagged_by: data.sentiment_tagged_by,
+                      sentiment_tagged_at: data.sentiment_tagged_at,
+                    }
+                  : msg
+              ),
+            })),
+          }
+        }
+      )
+      // Also invalidate analytics if they're being viewed
+      queryClient.invalidateQueries({
+        queryKey: ['analytics', 'complaint-rates'],
+      })
+    },
+  })
+}
+
+// Remove sentiment tag from a message
+export function useRemoveMessageSentiment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (
+      messageId: string | number
+    ): Promise<SentimentTagResponse> => {
+      const response = await api.delete(`/messages/${messageId}/sentiment`)
+      return response.data
+    },
+    onSuccess: (data) => {
+      // Update the message in the cache directly for immediate UI feedback
+      queryClient.setQueriesData<InfiniteData<ConversationResponse>>(
+        { queryKey: ['conversation'] },
+        (oldData) => {
+          if (!oldData) return oldData
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              messages: page.messages.map((msg) =>
+                String(msg.id) === String(data.id)
+                  ? {
+                      ...msg,
+                      sentiment: null,
+                      sentiment_tagged_by: null,
+                      sentiment_tagged_at: null,
+                    }
+                  : msg
+              ),
+            })),
+          }
+        }
+      )
+      queryClient.invalidateQueries({
+        queryKey: ['analytics', 'complaint-rates'],
+      })
+    },
+  })
 }

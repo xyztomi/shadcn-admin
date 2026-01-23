@@ -21,7 +21,7 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { useContacts, useResolveContact, useUnresolveContact, type Contact, type BoothTag } from '@/api/contacts'
 import { useAllAgents, useMyShiftStatus, type Agent } from '@/api/agents'
-import { useConversation, useSendMessage, useMarkAsRead, useDeleteChat, type Message } from '@/api/chat'
+import { useConversation, useSendMessage, useMarkAsRead, useDeleteChat, type Message, type MessageSentiment } from '@/api/chat'
 import { useTags } from '@/api/tags'
 import { useWebSocket } from '@/hooks/use-websocket'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -68,6 +68,8 @@ import { MessageStatusIcon } from './components/message-status-icon'
 import { TagSelector } from './components/tag-selector'
 import { QuickReplyPicker } from './components/quick-reply-picker'
 import { MediaAssetPicker } from './components/media-asset-picker'
+import { SentimentTagger } from './components/sentiment-tagger'
+import { SENTIMENT_CONFIG } from './constants/sentiment'
 
 const boothLabels: Record<string, string> = {
   king_padel_kemang: 'King Padel Kemang',
@@ -167,7 +169,12 @@ function safeFormat(dateStr: string | null | undefined, formatStr: string, fallb
   }
 }
 
-export function Chats() {
+interface ChatsProps {
+  /** wa_id to auto-select from URL search param */
+  initialContactWaId?: string
+}
+
+export function Chats({ initialContactWaId }: ChatsProps = {}) {
   const [search, setSearch] = useState('')
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [mobileSelectedContact, setMobileSelectedContact] = useState<Contact | null>(null)
@@ -176,6 +183,7 @@ export function Chats() {
   const [tagFilter, setTagFilter] = useState<string>('')
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [activeTab, setActiveTab] = useState<'active' | 'resolved'>('active')
+  const [pendingContactWaId, setPendingContactWaId] = useState<string | undefined>(initialContactWaId)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messageInputRef = useRef<HTMLInputElement>(null)
   const currentUser = useAuthStore((state) => state.auth.user)
@@ -200,6 +208,22 @@ export function Chats() {
   const { data: contacts, isLoading: contactsLoading } = useContacts(contactFilters)
   const { data: allAgents } = useAllAgents() // Fetch ALL agents for message sender lookup
   const { data: allTags } = useTags() // Fetch all tags for filter dropdown
+
+  // Auto-select contact from URL search param when contacts load
+  useEffect(() => {
+    if (pendingContactWaId && contacts && contacts.length > 0 && !selectedContact) {
+      const contact = contacts.find((c) => c.wa_id === pendingContactWaId)
+      if (contact) {
+        setSelectedContact(contact)
+        setMobileSelectedContact(contact)
+        // If contact is resolved, switch to resolved tab
+        if (contact.is_resolved) {
+          setActiveTab('resolved')
+        }
+      }
+      setPendingContactWaId(undefined) // Clear pending to avoid re-triggering
+    }
+  }, [pendingContactWaId, contacts, selectedContact])
 
   const agentsById = useMemo(() => {
     const map = new Map<number, Agent>()
@@ -707,6 +731,15 @@ export function Chats() {
                                 const timestamp = safeFormat(msg.timestamp || msg.created_at, 'h:mm a')
                                 const isFailed = msg.status === 'failed'
                                 const isBroadcast = !!msg.broadcast_id
+                                // Get sentiment styling for tagged inbound messages
+                                const sentimentConfig = msg.direction === 'inbound' && msg.sentiment
+                                  ? SENTIMENT_CONFIG[msg.sentiment as MessageSentiment]
+                                  : null
+                                // Get tagger name from agentsById
+                                const taggedByAgent = msg.sentiment_tagged_by
+                                  ? agentsById?.get(msg.sentiment_tagged_by)
+                                  : null
+                                const taggedByName = taggedByAgent?.full_name || taggedByAgent?.username || null
 
                                 return (
                                   <div
@@ -716,7 +749,10 @@ export function Chats() {
                                       msg.direction === 'outbound'
                                         ? 'self-end rounded-[16px_16px_0_16px] bg-primary/90 text-primary-foreground/75'
                                         : 'self-start rounded-[16px_16px_16px_0] bg-muted',
-                                      isFailed && msg.direction === 'outbound' && 'border border-destructive/50'
+                                      isFailed && msg.direction === 'outbound' && 'border border-destructive/50',
+                                      // Add left border styling for tagged messages
+                                      sentimentConfig && 'border-l-4',
+                                      sentimentConfig?.borderColor
                                     )}
                                   >
                                     {/* Broadcast indicator */}
@@ -729,6 +765,17 @@ export function Chats() {
                                       )}>
                                         <Radio className='h-3 w-3' />
                                         <span>Broadcast message</span>
+                                      </div>
+                                    )}
+                                    {/* Sentiment tag for inbound messages */}
+                                    {msg.direction === 'inbound' && (
+                                      <div className='mb-1 flex items-start gap-1'>
+                                        <SentimentTagger
+                                          messageId={msg.id}
+                                          currentSentiment={msg.sentiment as MessageSentiment | null}
+                                          taggedByName={taggedByName}
+                                          disabled={!canPerformActions}
+                                        />
                                       </div>
                                     )}
                                     {getMessageContent(msg)}

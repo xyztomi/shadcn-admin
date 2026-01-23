@@ -13,11 +13,9 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Badge } from '@/components/ui/badge'
 import {
   useAnalyticsOverview,
   useContactsByService,
-  useAgentPerformance,
   useMessagesByType,
   useDepartmentsSummary,
 } from '@/api/analytics'
@@ -37,7 +35,6 @@ const safeFormatDate = (dateString: string | null | undefined, pattern: string):
 export function Analytics() {
   const { data: overview, isLoading: overviewLoading } = useAnalyticsOverview()
   const { data: contactsByService, isLoading: contactsLoading } = useContactsByService()
-  const { data: agentPerformance, isLoading: agentsLoading } = useAgentPerformance()
   const { data: messagesByType, isLoading: messagesLoading } = useMessagesByType()
   const { data: departmentsSummary, isLoading: departmentsLoading } = useDepartmentsSummary()
 
@@ -249,67 +246,6 @@ export function Analytics() {
           </CardContent>
         </Card>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Agent Performance</CardTitle>
-          <CardDescription>Top performing agents by metrics</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {agentsLoading ? (
-            <div className='space-y-4'>
-              {[1, 2, 3, 4, 5].map((i) => (
-                <Skeleton key={i} className='h-16 w-full' />
-              ))}
-            </div>
-          ) : (
-            <div className='space-y-4'>
-              {agentPerformance
-                ?.sort((a, b) => b.total_resolved - a.total_resolved)
-                .slice(0, 10)
-                .map((agent) => (
-                  <div
-                    key={agent.id}
-                    className='flex items-center justify-between gap-4 rounded-lg border p-3'
-                  >
-                    <div className='flex items-center gap-3'>
-                      <div
-                        className={`h-2 w-2 rounded-full ${agent.is_online ? 'bg-green-500' : 'bg-gray-300'}`}
-                      />
-                      <div className='min-w-0 flex-1'>
-                        <p className='truncate text-sm font-medium'>{agent.full_name}</p>
-                        <p className='text-xs text-muted-foreground'>
-                          {agent.department === 'viufinder_xp' ? 'Viufinder XP' : 'Viufinder'} ·{' '}
-                          {agent.is_available ? 'Available' : 'Busy'}
-                        </p>
-                      </div>
-                      {agent.avg_rating ? (
-                        <Badge variant='outline' className='text-[0.65rem]'>
-                          {agent.avg_rating.toFixed(1)} ★
-                        </Badge>
-                      ) : null}
-                    </div>
-                    <div className='grid grid-cols-3 gap-2 text-center text-sm'>
-                      <div>
-                        <div className='font-medium'>{agent.total_resolved}</div>
-                        <div className='text-xs text-muted-foreground'>Resolved</div>
-                      </div>
-                      <div>
-                        <div className='font-medium'>{agent.total_messages_sent}</div>
-                        <div className='text-xs text-muted-foreground'>Messages</div>
-                      </div>
-                      <div>
-                        <div className='font-medium'>
-                          {Math.round(agent.avg_response_time / 60)}m
-                        </div>
-                        <div className='text-xs text-muted-foreground'>Avg Time</div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   )
 }

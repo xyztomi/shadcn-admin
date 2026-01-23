@@ -303,6 +303,26 @@ export async function exportOverviewAnalytics(
 
 // ============ COMPLAINT RATE ANALYTICS ============
 
+export interface TaggedMessage {
+  id: number
+  wa_id: string
+  content: string | null
+  sentiment: string
+  sentiment_tagged_at: string | null
+  sentiment_tagged_by: number
+  created_at: string | null
+  contact_name: string | null
+  contact_phone: string | null
+  tagged_by_name: string | null
+}
+
+export interface TaggedMessagesResponse {
+  messages: TaggedMessage[]
+  total: number
+  limit: number
+  offset: number
+}
+
 export interface AgentComplaintRate {
   agent_id: number
   agent_name: string
@@ -388,4 +408,45 @@ export async function exportComplaintRates(
   link.click()
   document.body.removeChild(link)
   window.URL.revokeObjectURL(url)
+}
+
+/**
+ * Get tagged messages for drill-down view
+ */
+export function useTaggedMessages(
+  startDate?: string,
+  endDate?: string,
+  agentId?: number,
+  sentiment?: string,
+  limit = 50,
+  offset = 0,
+  enabled = true
+) {
+  return useQuery({
+    queryKey: [
+      'analytics',
+      'tagged-messages',
+      startDate,
+      endDate,
+      agentId,
+      sentiment,
+      limit,
+      offset,
+    ],
+    queryFn: async (): Promise<TaggedMessagesResponse> => {
+      const params = new URLSearchParams()
+      if (startDate) params.append('start_date', startDate)
+      if (endDate) params.append('end_date', endDate)
+      if (agentId) params.append('agent_id', String(agentId))
+      if (sentiment) params.append('sentiment', sentiment)
+      params.append('limit', String(limit))
+      params.append('offset', String(offset))
+
+      const response = await api.get(
+        `/analytics/complaint-rates/messages?${params.toString()}`
+      )
+      return response.data
+    },
+    enabled,
+  })
 }

@@ -85,6 +85,25 @@ const getMessageContent = (msg: Message): string => {
   return ''
 }
 
+// Check if the message has a media URL (image, video, etc.)
+const getMediaUrl = (msg: Message): string | null => {
+  if (msg.media_url && msg.media_url.length > 0) {
+    // If it's a relative URL, prepend the API base
+    if (msg.media_url.startsWith('/')) {
+      return `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}${msg.media_url}`
+    }
+    return msg.media_url
+  }
+  return null
+}
+
+// Check if the media is an image based on message type or URL
+const isImageMedia = (msg: Message): boolean => {
+  if (msg.message_type === 'image') return true
+  const url = msg.media_url?.toLowerCase() || ''
+  return url.includes('.jpg') || url.includes('.jpeg') || url.includes('.png') || url.includes('.gif') || url.includes('.webp')
+}
+
 const getResolvedByInfo = (
   contact: Contact | null,
   agentsById?: Map<number, Agent>
@@ -778,6 +797,16 @@ export function Chats({ initialContactWaId }: ChatsProps = {}) {
                                         />
                                       </div>
                                     )}
+                                    {/* Media content (image) */}
+                                    {getMediaUrl(msg) && isImageMedia(msg) && (
+                                      <img
+                                        src={getMediaUrl(msg)!}
+                                        alt='Media'
+                                        className='mb-2 max-w-full rounded-lg'
+                                        loading='lazy'
+                                      />
+                                    )}
+                                    {/* Text content */}
                                     {getMessageContent(msg)}
                                     <span
                                       className={cn(

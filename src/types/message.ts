@@ -43,6 +43,8 @@ export interface Message {
   content?: string | null
   text?: string | null
   message?: string | null
+  /** URL to media file (image, video, document, etc.) */
+  media_url?: string | null
   /** Sender metadata provided by the backend for agent/customer attribution. */
   sender?: string | null
   agent_id?: number | null

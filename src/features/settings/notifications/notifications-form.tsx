@@ -1,220 +1,261 @@
-import { z } from 'zod'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Link } from '@tanstack/react-router'
-import { showSubmittedData } from '@/lib/show-submitted-data'
+import { useCallback, useState } from 'react'
+import { toast } from 'sonner'
+import { Bell, BellOff, Volume2, VolumeX } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Label } from '@/components/ui/label'
+import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
-
-const notificationsFormSchema = z.object({
-  type: z.enum(['all', 'mentions', 'none'], {
-    error: (iss) =>
-      iss.input === undefined
-        ? 'Please select a notification type.'
-        : undefined,
-  }),
-  mobile: z.boolean().default(false).optional(),
-  communication_emails: z.boolean().default(false).optional(),
-  social_emails: z.boolean().default(false).optional(),
-  marketing_emails: z.boolean().default(false).optional(),
-  security_emails: z.boolean(),
-})
-
-type NotificationsFormValues = z.infer<typeof notificationsFormSchema>
-
-// This can come from your database or API.
-const defaultValues: Partial<NotificationsFormValues> = {
-  communication_emails: false,
-  marketing_emails: false,
-  social_emails: true,
-  security_emails: true,
-}
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { useNotificationStore } from '@/stores/notification-store'
+import { playNotificationSound } from '@/lib/notification-sound'
 
 export function NotificationsForm() {
-  const form = useForm<NotificationsFormValues>({
-    resolver: zodResolver(notificationsFormSchema),
-    defaultValues,
-  })
+  const {
+    browserNotificationsEnabled,
+    toastNotificationsEnabled,
+    soundEnabled,
+    soundVolume,
+    notifyOnNewMessage,
+    notifyOnlyWhenHidden,
+    setBrowserNotifications,
+    setToastNotifications,
+    setSoundEnabled,
+    setSoundVolume,
+    setNotifyOnNewMessage,
+    setNotifyOnlyWhenHidden,
+  } = useNotificationStore()
+
+  const [browserPermission, setBrowserPermission] = useState<NotificationPermission>(
+    typeof window !== 'undefined' && 'Notification' in window
+      ? Notification.permission
+      : 'default'
+  )
+
+  const requestBrowserPermission = useCallback(async () => {
+    if (!('Notification' in window)) {
+      toast.error('Browser notifications are not supported.')
+      return
+    }
+
+    try {
+      const permission = await Notification.requestPermission()
+      setBrowserPermission(permission)
+      if (permission === 'granted') {
+        toast.success('Browser notifications enabled!')
+        setBrowserNotifications(true)
+      } else if (permission === 'denied') {
+        toast.error('Notifications blocked. Please enable in browser settings.')
+        setBrowserNotifications(false)
+      }
+    } catch {
+      toast.error('Failed to request notification permission.')
+    }
+  }, [setBrowserNotifications])
+
+  const testSound = useCallback(() => {
+    playNotificationSound(soundVolume)
+  }, [soundVolume])
+
+  const testNotification = useCallback(() => {
+    toast.info('Test Notification', {
+      description: 'This is what a new message notification looks like!',
+      duration: 5000,
+    })
+    if (soundEnabled) {
+      playNotificationSound(soundVolume)
+    }
+  }, [soundEnabled, soundVolume])
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit((data) => showSubmittedData(data))}
-        className='space-y-8'
-      >
-        <FormField
-          control={form.control}
-          name='type'
-          render={({ field }) => (
-            <FormItem className='relative space-y-3'>
-              <FormLabel>Notify me about...</FormLabel>
-              <FormControl>
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  className='flex flex-col gap-2'
-                >
-                  <FormItem className='flex items-center'>
-                    <FormControl>
-                      <RadioGroupItem value='all' />
-                    </FormControl>
-                    <FormLabel className='font-normal'>
-                      All new messages
-                    </FormLabel>
-                  </FormItem>
-                  <FormItem className='flex items-center'>
-                    <FormControl>
-                      <RadioGroupItem value='mentions' />
-                    </FormControl>
-                    <FormLabel className='font-normal'>
-                      Direct messages and mentions
-                    </FormLabel>
-                  </FormItem>
-                  <FormItem className='flex items-center'>
-                    <FormControl>
-                      <RadioGroupItem value='none' />
-                    </FormControl>
-                    <FormLabel className='font-normal'>Nothing</FormLabel>
-                  </FormItem>
-                </RadioGroup>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className='relative'>
-          <h3 className='mb-4 text-lg font-medium'>Email Notifications</h3>
-          <div className='space-y-4'>
-            <FormField
-              control={form.control}
-              name='communication_emails'
-              render={({ field }) => (
-                <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
-                  <div className='space-y-0.5'>
-                    <FormLabel className='text-base'>
-                      Communication emails
-                    </FormLabel>
-                    <FormDescription>
-                      Receive emails about your account activity.
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='marketing_emails'
-              render={({ field }) => (
-                <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
-                  <div className='space-y-0.5'>
-                    <FormLabel className='text-base'>
-                      Marketing emails
-                    </FormLabel>
-                    <FormDescription>
-                      Receive emails about new products, features, and more.
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='social_emails'
-              render={({ field }) => (
-                <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
-                  <div className='space-y-0.5'>
-                    <FormLabel className='text-base'>Social emails</FormLabel>
-                    <FormDescription>
-                      Receive emails for friend requests, follows, and more.
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='security_emails'
-              render={({ field }) => (
-                <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
-                  <div className='space-y-0.5'>
-                    <FormLabel className='text-base'>Security emails</FormLabel>
-                    <FormDescription>
-                      Receive emails about your account activity and security.
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      disabled
-                      aria-readonly
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
+    <div className='space-y-6'>
+      {/* Master Toggle */}
+      <Card>
+        <CardHeader>
+          <CardTitle className='flex items-center gap-2'>
+            {notifyOnNewMessage ? (
+              <Bell className='h-5 w-5' />
+            ) : (
+              <BellOff className='h-5 w-5' />
+            )}
+            Notifications
+          </CardTitle>
+          <CardDescription>
+            Get notified when new WhatsApp messages arrive
+          </CardDescription>
+        </CardHeader>
+        <CardContent className='space-y-4'>
+          <div className='flex items-center justify-between'>
+            <div className='space-y-0.5'>
+              <Label htmlFor='notify-new'>Enable notifications</Label>
+              <p className='text-sm text-muted-foreground'>
+                Receive alerts for new incoming messages
+              </p>
+            </div>
+            <Switch
+              id='notify-new'
+              checked={notifyOnNewMessage}
+              onCheckedChange={setNotifyOnNewMessage}
             />
           </div>
-        </div>
-        <FormField
-          control={form.control}
-          name='mobile'
-          render={({ field }) => (
-            <FormItem className='relative flex flex-row items-start'>
-              <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <div className='space-y-1 leading-none'>
-                <FormLabel>
-                  Use different settings for my mobile devices
-                </FormLabel>
-                <FormDescription>
-                  You can manage your mobile notifications in the{' '}
-                  <Link
-                    to='/settings'
-                    className='underline decoration-dashed underline-offset-4 hover:decoration-solid'
-                  >
-                    mobile settings
-                  </Link>{' '}
-                  page.
-                </FormDescription>
+
+          {notifyOnNewMessage && (
+            <div className='flex items-center justify-between'>
+              <div className='space-y-0.5'>
+                <Label htmlFor='notify-hidden'>Only when tab is hidden</Label>
+                <p className='text-sm text-muted-foreground'>
+                  Don&apos;t show notifications while you&apos;re actively using the app
+                </p>
               </div>
-            </FormItem>
+              <Switch
+                id='notify-hidden'
+                checked={notifyOnlyWhenHidden}
+                onCheckedChange={setNotifyOnlyWhenHidden}
+              />
+            </div>
           )}
-        />
-        <Button type='submit'>Update notifications</Button>
-      </form>
-    </Form>
+        </CardContent>
+      </Card>
+
+      {/* Toast Notifications */}
+      <Card>
+        <CardHeader>
+          <CardTitle>In-App Notifications</CardTitle>
+          <CardDescription>
+            Toast popups that appear within the app
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className='flex items-center justify-between'>
+            <div className='space-y-0.5'>
+              <Label htmlFor='toast-enabled'>Show toast notifications</Label>
+              <p className='text-sm text-muted-foreground'>
+                Display popup alerts in the corner of the screen
+              </p>
+            </div>
+            <Switch
+              id='toast-enabled'
+              checked={toastNotificationsEnabled}
+              onCheckedChange={setToastNotifications}
+              disabled={!notifyOnNewMessage}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Browser Notifications */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Browser Notifications</CardTitle>
+          <CardDescription>
+            Desktop notifications that appear even when the tab is hidden
+          </CardDescription>
+        </CardHeader>
+        <CardContent className='space-y-4'>
+          <div className='flex items-center justify-between'>
+            <div className='space-y-0.5'>
+              <Label htmlFor='browser-enabled'>Enable browser notifications</Label>
+              <p className='text-sm text-muted-foreground'>
+                Get notified even when the browser tab is in the background
+              </p>
+            </div>
+            <Switch
+              id='browser-enabled'
+              checked={browserNotificationsEnabled && browserPermission === 'granted'}
+              onCheckedChange={setBrowserNotifications}
+              disabled={!notifyOnNewMessage || browserPermission !== 'granted'}
+            />
+          </div>
+
+          {browserPermission !== 'granted' && (
+            <div className='rounded-lg border border-dashed p-4'>
+              <p className='text-sm text-muted-foreground mb-3'>
+                {browserPermission === 'denied'
+                  ? 'Browser notifications are blocked. Please enable them in your browser settings.'
+                  : 'Allow browser notifications to receive alerts when the tab is hidden.'}
+              </p>
+              {browserPermission === 'default' && (
+                <Button onClick={requestBrowserPermission} variant='outline' size='sm'>
+                  <Bell className='mr-2 h-4 w-4' />
+                  Enable Browser Notifications
+                </Button>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Sound Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className='flex items-center gap-2'>
+            {soundEnabled ? (
+              <Volume2 className='h-5 w-5' />
+            ) : (
+              <VolumeX className='h-5 w-5' />
+            )}
+            Sound
+          </CardTitle>
+          <CardDescription>
+            Play a sound when new messages arrive
+          </CardDescription>
+        </CardHeader>
+        <CardContent className='space-y-4'>
+          <div className='flex items-center justify-between'>
+            <div className='space-y-0.5'>
+              <Label htmlFor='sound-enabled'>Notification sound</Label>
+              <p className='text-sm text-muted-foreground'>
+                Play an audio alert for new messages
+              </p>
+            </div>
+            <Switch
+              id='sound-enabled'
+              checked={soundEnabled}
+              onCheckedChange={setSoundEnabled}
+              disabled={!notifyOnNewMessage}
+            />
+          </div>
+
+          {soundEnabled && notifyOnNewMessage && (
+            <div className='space-y-3'>
+              <div className='flex items-center justify-between'>
+                <Label>Volume</Label>
+                <span className='text-sm text-muted-foreground'>
+                  {Math.round(soundVolume * 100)}%
+                </span>
+              </div>
+              <div className='flex items-center gap-3'>
+                <VolumeX className='h-4 w-4 text-muted-foreground' />
+                <Slider
+                  value={[soundVolume]}
+                  onValueChange={([value]) => setSoundVolume(value)}
+                  min={0}
+                  max={1}
+                  step={0.1}
+                  className='flex-1'
+                />
+                <Volume2 className='h-4 w-4 text-muted-foreground' />
+              </div>
+              <Button onClick={testSound} variant='outline' size='sm'>
+                Test Sound
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Test Button */}
+      <div className='flex justify-end'>
+        <Button onClick={testNotification} disabled={!notifyOnNewMessage}>
+          <Bell className='mr-2 h-4 w-4' />
+          Send Test Notification
+        </Button>
+      </div>
+    </div>
   )
 }

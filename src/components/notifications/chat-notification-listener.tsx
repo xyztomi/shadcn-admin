@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { useWebSocket, type WebSocketEvent, type NewMessageEvent } from '@/hooks/use-websocket'
+import { useNotificationStore } from '@/stores/notification-store'
+import { playNotificationSound } from '@/lib/notification-sound'
 
 const NOTIFICATION_PROMPT_STORAGE_KEY = 'wa-crm-browser-notifications'
 const MAX_PREVIEW_LENGTH = 120
@@ -114,19 +116,40 @@ export function ChatNotificationListener() {
       const payload = event as NewMessageEvent
       if (!payload.message || payload.message.direction !== 'inbound') return
 
+      // Get notification settings from store
+      const {
+        toastNotificationsEnabled,
+        browserNotificationsEnabled,
+        soundEnabled,
+        soundVolume,
+        shouldNotify,
+      } = useNotificationStore.getState()
+
+      // Check if we should notify based on settings
+      if (!shouldNotify(isDocumentVisible)) return
+
       const senderName = payload.message.sender_name || 'New WhatsApp message'
       const preview = getMessagePreview(payload.message)
 
-      toast.info(senderName, {
-        description: preview,
-        action: {
-          label: 'Open chat',
-          onClick: () => router.navigate({ to: '/chats' }),
-        },
-        duration: 6000,
-      })
+      // Play notification sound
+      if (soundEnabled) {
+        playNotificationSound(soundVolume)
+      }
 
-      if (!isDocumentVisible) {
+      // Show toast notification
+      if (toastNotificationsEnabled) {
+        toast.info(senderName, {
+          description: preview,
+          action: {
+            label: 'Open chat',
+            onClick: () => router.navigate({ to: '/chats' }),
+          },
+          duration: 6000,
+        })
+      }
+
+      // Show browser notification when tab is hidden
+      if (!isDocumentVisible && browserNotificationsEnabled) {
         showBrowserNotification(senderName, preview, payload.wa_id)
       }
     },

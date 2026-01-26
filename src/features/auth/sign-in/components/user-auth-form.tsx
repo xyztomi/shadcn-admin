@@ -61,9 +61,8 @@ export function UserAuthForm({
 
       toast.success(`Welcome back, ${meResponse.data.full_name || meResponse.data.username}!`)
 
-      // Redirect to the stored location or default to dashboard
-      const targetPath = redirectTo || '/'
-      navigate({ to: targetPath, replace: true })
+      // Always redirect to home page after login
+      navigate({ to: '/', replace: true })
     } catch (error) {
       handleServerError(error)
     }

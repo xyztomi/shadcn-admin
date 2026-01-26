@@ -22,6 +22,7 @@ import {
   Tag,
   Zap,
   Bot,
+  // GitBranch,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -50,6 +51,11 @@ export const sidebarData: SidebarData = {
           url: '/broadcast',
           icon: Radio,
         },
+        // {
+        //   title: 'Flows',
+        //   url: '/flows',
+        //   icon: GitBranch,
+        // },
         // {
         //   title: 'Tasks',
         //   url: '/tasks',

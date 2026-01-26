@@ -38,5 +38,8 @@ export * from './quick-replies'
 // Broadcast exports
 export * from './broadcast'
 
+// Flows exports
+export * from './flows'
+
 // Settings exports
 export * from './settings'

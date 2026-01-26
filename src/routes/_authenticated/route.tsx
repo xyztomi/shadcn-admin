@@ -11,7 +11,6 @@ export const Route = createFileRoute('/_authenticated')({
     if (!auth.accessToken) {
       throw redirect({
         to: '/sign-in',
-        search: { redirect: location.href },
       })
     }
 
@@ -27,7 +26,6 @@ export const Route = createFileRoute('/_authenticated')({
         auth.reset()
         throw redirect({
           to: '/sign-in',
-          search: { redirect: location.href },
         })
       }
     }

@@ -56,11 +56,14 @@ export const contactsColumns: ColumnDef<Contact>[] = [
   {
     accessorKey: 'wa_id',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='WhatsApp ID' />
+      <DataTableColumnHeader column={column} title='Phone Number' />
     ),
-    cell: ({ row }) => (
-      <span className='font-mono text-xs'>{row.getValue('wa_id')}</span>
-    ),
+    cell: ({ row }) => {
+      const waId = row.getValue('wa_id') as string
+      // Format as phone number: 628xxx -> +62 8xxx
+      const formatted = waId ? `+${waId.slice(0, 2)} ${waId.slice(2, 5)}-${waId.slice(5, 9)}-${waId.slice(9)}` : '-'
+      return <span className='font-mono text-xs'>{formatted}</span>
+    },
   },
   {
     accessorKey: 'service_tag',

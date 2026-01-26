@@ -20,7 +20,7 @@ export default defineConfig({
     },
   },
   server: {
-    allowedHosts: ['train-attending-wires-pac.trycloudflare.com'],
+    allowedHosts: ['join-under-incorporate-notes.trycloudflare.com'],
     proxy: {
       '/api': {
         target: 'http://localhost:8000',

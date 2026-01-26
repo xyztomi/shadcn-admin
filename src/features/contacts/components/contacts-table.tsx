@@ -33,7 +33,7 @@ interface ContactsTableProps {
 export function ContactsTable({ data, isLoading }: ContactsTableProps) {
   const [rowSelection, setRowSelection] = useState({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-    wa_id: false, // Hide by default
+    wa_id: true, // Show phone number by default
   })
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [sorting, setSorting] = useState<SortingState>([])

@@ -1,5 +1,5 @@
 import { Outlet } from '@tanstack/react-router'
-import { Monitor, Bell, Palette, Clock, Tags, Zap, Link2, ImageIcon } from 'lucide-react'
+import { Bell, Palette, Clock, Tags, Zap, Link2, ImageIcon } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
@@ -45,11 +45,11 @@ const sidebarNavItems = [
     href: '/settings/notifications',
     icon: <Bell size={18} />,
   },
-  {
-    title: 'Display',
-    href: '/settings/display',
-    icon: <Monitor size={18} />,
-  },
+  // {
+  //   title: 'Display',
+  //   href: '/settings/display',
+  //   icon: <Monitor size={18} />,
+  // },
 ]
 
 export function Settings() {

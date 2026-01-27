@@ -104,7 +104,7 @@ export function useAnalyticsOverview(startDate?: string, endDate?: string) {
   const params = new URLSearchParams()
   if (startDate) params.append('start_date', startDate)
   if (endDate) params.append('end_date', endDate)
-  if (selectedDepartment) params.append('department', selectedDepartment)
+  if (selectedDepartment && selectedDepartment !== 'all') params.append('department', selectedDepartment)
 
   return useQuery({
     queryKey: ['analytics', 'overview', startDate, endDate, selectedDepartment],
@@ -129,7 +129,8 @@ export function useMessagesByDate(days = 30, agentId?: number | string) {
     ],
     queryFn: async (): Promise<MessageByDate[]> => {
       const params = new URLSearchParams({ days: String(days) })
-      if (selectedDepartment) params.append('department', selectedDepartment)
+      if (selectedDepartment && selectedDepartment !== 'all')
+        params.append('department', selectedDepartment)
       if (agentId) params.append('agent_id', String(agentId))
       const response = await api.get(
         `/analytics/messages/by-date?${params.toString()}`
@@ -146,7 +147,7 @@ export function useMessagesByHour() {
     queryKey: ['analytics', 'messages-by-hour', selectedDepartment],
     queryFn: async (): Promise<MessageByHour[]> => {
       const params = new URLSearchParams()
-      if (selectedDepartment) params.append('department', selectedDepartment)
+      if (selectedDepartment && selectedDepartment !== 'all') params.append('department', selectedDepartment)
       const response = await api.get(
         `/analytics/messages/by-hour?${params.toString()}`
       )
@@ -162,7 +163,7 @@ export function useMessagesByType() {
     queryKey: ['analytics', 'messages-by-type', selectedDepartment],
     queryFn: async (): Promise<MessageByType[]> => {
       const params = new URLSearchParams()
-      if (selectedDepartment) params.append('department', selectedDepartment)
+      if (selectedDepartment && selectedDepartment !== 'all') params.append('department', selectedDepartment)
       const response = await api.get(
         `/analytics/messages/by-type?${params.toString()}`
       )
@@ -178,7 +179,7 @@ export function useContactsByDate(days = 30) {
     queryKey: ['analytics', 'contacts-by-date', days, selectedDepartment],
     queryFn: async (): Promise<ContactByDate[]> => {
       const params = new URLSearchParams({ days: String(days) })
-      if (selectedDepartment) params.append('department', selectedDepartment)
+      if (selectedDepartment && selectedDepartment !== 'all') params.append('department', selectedDepartment)
       const response = await api.get(
         `/analytics/contacts/by-date?${params.toString()}`
       )
@@ -194,7 +195,7 @@ export function useContactsByService() {
     queryKey: ['analytics', 'contacts-by-service', selectedDepartment],
     queryFn: async (): Promise<ContactByService[]> => {
       const params = new URLSearchParams()
-      if (selectedDepartment) params.append('department', selectedDepartment)
+      if (selectedDepartment && selectedDepartment !== 'all') params.append('department', selectedDepartment)
       const response = await api.get(
         `/analytics/contacts/by-service?${params.toString()}`
       )
@@ -210,7 +211,7 @@ export function useAgentPerformance() {
     queryKey: ['analytics', 'agent-performance', selectedDepartment],
     queryFn: async (): Promise<AgentPerformance[]> => {
       const params = new URLSearchParams()
-      if (selectedDepartment) params.append('department', selectedDepartment)
+      if (selectedDepartment && selectedDepartment !== 'all') params.append('department', selectedDepartment)
       const response = await api.get(
         `/analytics/agents/performance?${params.toString()}`
       )
@@ -227,7 +228,7 @@ export function useDepartmentsSummary() {
     queryKey: ['analytics', 'departments-summary', selectedDepartment],
     queryFn: async (): Promise<DepartmentsSummary> => {
       const params = new URLSearchParams()
-      if (selectedDepartment) params.append('department', selectedDepartment)
+      if (selectedDepartment && selectedDepartment !== 'all') params.append('department', selectedDepartment)
       const response = await api.get(
         `/analytics/departments/summary?${params.toString()}`
       )

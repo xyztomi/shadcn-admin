@@ -1,5 +1,6 @@
 import { format } from 'date-fns'
 import { Calendar as CalendarIcon } from 'lucide-react'
+import { getServerDate } from '@/lib/server-time'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import {
@@ -19,6 +20,8 @@ export function DatePicker({
   onSelect,
   placeholder = 'Pick a date',
 }: DatePickerProps) {
+  const serverNow = getServerDate()
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -42,7 +45,7 @@ export function DatePicker({
           selected={selected}
           onSelect={onSelect}
           disabled={(date: Date) =>
-            date > new Date() || date < new Date('1900-01-01')
+            date > serverNow || date < new Date('1900-01-01')
           }
         />
       </PopoverContent>

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { Fragment } from 'react/jsx-runtime'
 import { format } from 'date-fns'
+import { getServerDate } from '@/lib/server-time'
 import {
   ArrowLeft,
   MoreVertical,
@@ -212,7 +213,7 @@ function get24HourWindowStatus(lastInboundMessageAt: string | null | undefined):
       return { isExpired: false, hoursAgo: null, message: null }
     }
 
-    const now = new Date()
+    const now = getServerDate()
     const hoursDiff = (now.getTime() - lastInbound.getTime()) / (1000 * 60 * 60)
 
     if (hoursDiff >= 24) {

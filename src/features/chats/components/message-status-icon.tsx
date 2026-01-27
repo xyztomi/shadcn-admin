@@ -1,4 +1,4 @@
-import { Check, CheckCheck, AlertCircle, Loader2 } from 'lucide-react'
+import { Check, CheckCheck, AlertCircle, Loader2, EyeOff } from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,
@@ -12,6 +12,8 @@ interface MessageStatusIconProps {
   status: MessageStatusType
   error?: string | null
   className?: string
+  /** Whether the contact has read receipts enabled (null = unknown, false = disabled) */
+  readReceiptsEnabled?: boolean | null
 }
 
 const statusConfig: Record<
@@ -55,21 +57,40 @@ export function MessageStatusIcon({
   status,
   error,
   className,
+  readReceiptsEnabled,
 }: MessageStatusIconProps) {
   const config = statusConfig[status]
   if (!config) return null
 
   const Icon = config.icon
-  const tooltipLabel = status === 'failed' && error ? error : config.label
+
+  // Handle read receipts disabled case
+  // When status is "delivered" and we know read receipts are disabled (false),
+  // show a special indicator. If null (unknown), show normal delivered status.
+  const isReadReceiptsOff = readReceiptsEnabled === false && status === 'delivered'
+
+  let tooltipLabel = status === 'failed' && error ? error : config.label
+  let iconClassName = config.className
+
+  if (isReadReceiptsOff) {
+    tooltipLabel = 'Delivered (read receipts off)'
+    // Use a slightly different style to indicate unknown read status
+    iconClassName = 'text-muted-foreground/50'
+  }
 
   return (
     <TooltipProvider>
       <Tooltip delayDuration={300}>
         <TooltipTrigger asChild>
-          <Icon
-            className={`h-3 w-3 ${config.className} ${config.animate ? 'animate-spin' : ''} ${className ?? ''}`}
-            aria-label={config.label}
-          />
+          <span className="relative inline-flex items-center">
+            <Icon
+              className={`h-3 w-3 ${iconClassName} ${config.animate ? 'animate-spin' : ''} ${className ?? ''}`}
+              aria-label={config.label}
+            />
+            {isReadReceiptsOff && (
+              <EyeOff className="absolute -right-1.5 -top-1 h-2 w-2 text-muted-foreground/70" />
+            )}
+          </span>
         </TooltipTrigger>
         <TooltipContent
           side="top"

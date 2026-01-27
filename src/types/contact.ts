@@ -33,6 +33,8 @@ export interface Contact {
   last_inbound_message_at: string | null
   unread_count: number
   tags: ContactTag[]
+  /** Whether contact has read receipts enabled (null = unknown) */
+  read_receipts_enabled: boolean | null
   created_at: string
   updated_at: string
 }

@@ -18,6 +18,7 @@ import {
   Paperclip,
   Filter,
   AlertTriangle,
+  EyeOff,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -711,9 +712,26 @@ export function Chats({ initialContactWaId }: ChatsProps = {}) {
                         <span className='text-sm font-medium lg:text-base'>
                           {selectedContact.name || selectedContact.phone_number}
                         </span>
-                        <span className='block text-xs text-muted-foreground'>
-                          {selectedContact.phone_number}
-                        </span>
+                        <div className='flex items-center gap-2'>
+                          <span className='text-xs text-muted-foreground'>
+                            {selectedContact.phone_number}
+                          </span>
+                          {selectedContact.read_receipts_enabled === false && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className='inline-flex items-center gap-1 rounded-full bg-muted px-1.5 py-0.5 text-[0.65rem] text-muted-foreground'>
+                                    <EyeOff className='h-2.5 w-2.5' />
+                                    Read receipts off
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>This contact has disabled read receipts in WhatsApp.<br />You cannot see if they've read your messages.</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -912,6 +930,7 @@ export function Chats({ initialContactWaId }: ChatsProps = {}) {
                                         <MessageStatusIcon
                                           status={msg.status}
                                           error={msg.error}
+                                          readReceiptsEnabled={selectedContact?.read_receipts_enabled}
                                         />
                                       )}
                                     </span>

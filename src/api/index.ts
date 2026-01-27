@@ -26,9 +26,6 @@ export * from './analytics'
 // Shifts exports
 export * from './shifts'
 
-// Templates exports
-export * from './templates'
-
 // Tags exports
 export * from './tags'
 
@@ -37,9 +34,6 @@ export * from './quick-replies'
 
 // Broadcast exports
 export * from './broadcast'
-
-// Flows exports
-export * from './flows'
 
 // Settings exports
 export * from './settings'

@@ -26,7 +26,6 @@ import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-p
 import { Route as ClerkAuthenticatedRouteRouteImport } from './routes/clerk/_authenticated/route'
 import { Route as ClerkauthRouteRouteImport } from './routes/clerk/(auth)/route'
 import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authenticated/settings/route'
-import { Route as AuthenticatedTemplatesIndexRouteImport } from './routes/_authenticated/templates/index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedInteractiveMessageIndexRouteImport } from './routes/_authenticated/interactive-message/index'
 import { Route as AuthenticatedContactsIndexRouteImport } from './routes/_authenticated/contacts/index'
@@ -130,12 +129,6 @@ const AuthenticatedSettingsRouteRoute =
   AuthenticatedSettingsRouteRouteImport.update({
     id: '/settings',
     path: '/settings',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedTemplatesIndexRoute =
-  AuthenticatedTemplatesIndexRouteImport.update({
-    id: '/templates/',
-    path: '/templates/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedSettingsIndexRoute =
@@ -296,7 +289,6 @@ export interface FileRoutesByFullPath {
   '/contacts': typeof AuthenticatedContactsIndexRoute
   '/interactive-message': typeof AuthenticatedInteractiveMessageIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
-  '/templates': typeof AuthenticatedTemplatesIndexRoute
   '/dashboard/agent/$agentId': typeof AuthenticatedDashboardAgentAgentIdRoute
   '/dashboard/agents/$agentId': typeof AuthenticatedDashboardAgentsAgentIdRoute
 }
@@ -333,7 +325,6 @@ export interface FileRoutesByTo {
   '/contacts': typeof AuthenticatedContactsIndexRoute
   '/interactive-message': typeof AuthenticatedInteractiveMessageIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
-  '/templates': typeof AuthenticatedTemplatesIndexRoute
   '/dashboard/agent/$agentId': typeof AuthenticatedDashboardAgentAgentIdRoute
   '/dashboard/agents/$agentId': typeof AuthenticatedDashboardAgentsAgentIdRoute
 }
@@ -375,7 +366,6 @@ export interface FileRoutesById {
   '/_authenticated/contacts/': typeof AuthenticatedContactsIndexRoute
   '/_authenticated/interactive-message/': typeof AuthenticatedInteractiveMessageIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
-  '/_authenticated/templates/': typeof AuthenticatedTemplatesIndexRoute
   '/_authenticated/dashboard/agent/$agentId': typeof AuthenticatedDashboardAgentAgentIdRoute
   '/_authenticated/dashboard/agents/$agentId': typeof AuthenticatedDashboardAgentsAgentIdRoute
 }
@@ -415,7 +405,6 @@ export interface FileRouteTypes {
     | '/contacts'
     | '/interactive-message'
     | '/settings/'
-    | '/templates'
     | '/dashboard/agent/$agentId'
     | '/dashboard/agents/$agentId'
   fileRoutesByTo: FileRoutesByTo
@@ -452,7 +441,6 @@ export interface FileRouteTypes {
     | '/contacts'
     | '/interactive-message'
     | '/settings'
-    | '/templates'
     | '/dashboard/agent/$agentId'
     | '/dashboard/agents/$agentId'
   id:
@@ -493,7 +481,6 @@ export interface FileRouteTypes {
     | '/_authenticated/contacts/'
     | '/_authenticated/interactive-message/'
     | '/_authenticated/settings/'
-    | '/_authenticated/templates/'
     | '/_authenticated/dashboard/agent/$agentId'
     | '/_authenticated/dashboard/agents/$agentId'
   fileRoutesById: FileRoutesById
@@ -632,13 +619,6 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/templates/': {
-      id: '/_authenticated/templates/'
-      path: '/templates'
-      fullPath: '/templates'
-      preLoaderRoute: typeof AuthenticatedTemplatesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/settings/': {
@@ -849,7 +829,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedChatsIndexRoute: typeof AuthenticatedChatsIndexRoute
   AuthenticatedContactsIndexRoute: typeof AuthenticatedContactsIndexRoute
   AuthenticatedInteractiveMessageIndexRoute: typeof AuthenticatedInteractiveMessageIndexRoute
-  AuthenticatedTemplatesIndexRoute: typeof AuthenticatedTemplatesIndexRoute
   AuthenticatedDashboardAgentsAgentIdRoute: typeof AuthenticatedDashboardAgentsAgentIdRoute
 }
 
@@ -867,7 +846,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedContactsIndexRoute: AuthenticatedContactsIndexRoute,
   AuthenticatedInteractiveMessageIndexRoute:
     AuthenticatedInteractiveMessageIndexRoute,
-  AuthenticatedTemplatesIndexRoute: AuthenticatedTemplatesIndexRoute,
   AuthenticatedDashboardAgentsAgentIdRoute:
     AuthenticatedDashboardAgentsAgentIdRoute,
 }

@@ -91,10 +91,22 @@ let globalWs: WebSocket | null = null
 let globalReconnectTimeout: NodeJS.Timeout | null = null
 let connectionCount = 0
 
+// Store all event handlers - each component that calls useWebSocket gets its handler added here
+const eventHandlers = new Set<WSEventHandler>()
+
 export function useWebSocket(onEvent?: WSEventHandler) {
   const onEventRef = useRef(onEvent)
   const queryClient = useQueryClient()
   const queryClientRef = useRef(queryClient)
+
+  // Create a stable wrapper that always calls the latest handler
+  const stableHandlerRef = useRef<WSEventHandler | null>(null)
+  if (!stableHandlerRef.current && onEvent) {
+    // Create a wrapper function that reads from the ref
+    stableHandlerRef.current = (event: WebSocketEvent) => {
+      onEventRef.current?.(event)
+    }
+  }
 
   // Keep refs updated
   onEventRef.current = onEvent
@@ -197,8 +209,14 @@ export function useWebSocket(onEvent?: WSEventHandler) {
           }
         }
 
-        // Call custom handler if provided
-        onEventRef.current?.(data)
+        // Call ALL registered event handlers (not just one)
+        for (const handler of eventHandlers) {
+          try {
+            handler(data)
+          } catch {
+            // Ignore handler errors
+          }
+        }
       } catch {
         // Invalid JSON, ignore
       }
@@ -227,6 +245,12 @@ export function useWebSocket(onEvent?: WSEventHandler) {
     let isMounted = true
     connectionCount++
 
+    // Register this component's event handler (using stable wrapper)
+    const handler = stableHandlerRef.current
+    if (handler) {
+      eventHandlers.add(handler)
+    }
+
     // Delay connection to let StrictMode double-mount settle
     // StrictMode: mount -> unmount -> mount happens synchronously
     // So by the time setTimeout fires, we know the final mount state
@@ -240,6 +264,11 @@ export function useWebSocket(onEvent?: WSEventHandler) {
       isMounted = false
       connectionCount--
       clearTimeout(connectTimeout)
+
+      // Remove this component's event handler
+      if (handler) {
+        eventHandlers.delete(handler)
+      }
 
       // Only close WebSocket when no components are using it
       // Use setTimeout to allow for StrictMode remount

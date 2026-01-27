@@ -334,20 +334,10 @@ export function Chats({ initialContactWaId }: ChatsProps = {}) {
         })
       }
 
-      // Handle new inbound messages - show notification if not viewing that chat
-      if (event.type === 'new_message' && event.message?.direction === 'inbound') {
-        const isViewingThisChat = selectedContact?.wa_id === event.wa_id
-        if (!isViewingThisChat) {
-          const senderName = event.message.sender_name || 'New message'
-          const content = event.message.content || ''
-          toast.info(senderName, {
-            description: content.length > 50 ? content.slice(0, 50) + '...' : content,
-            duration: 5000,
-          })
-        }
-      }
+      // NOTE: New message notifications are handled by ChatNotificationListener component
+      // to avoid duplicate toasts. This handler only handles message failures.
     },
-    [selectedContact?.wa_id]
+    []
   )
 
   // WebSocket for real-time updates
@@ -621,19 +611,27 @@ export function Chats({ initialContactWaId }: ChatsProps = {}) {
                       className={cn(
                         'group hover:bg-accent hover:text-accent-foreground',
                         'flex w-full rounded-md px-2 py-2 text-start text-sm',
-                        selectedContact?.wa_id === contact.wa_id && 'sm:bg-muted'
+                        selectedContact?.wa_id === contact.wa_id && 'sm:bg-muted',
+                        contact.unread_count > 0 && 'bg-primary/5 border-l-2 border-l-primary'
                       )}
                       onClick={() => handleSelectContact(contact)}
                     >
                       <div className='flex gap-2 w-full'>
-                        <Avatar>
-                          <AvatarFallback>
-                            {getInitials(contact.name, contact.phone_number)}
-                          </AvatarFallback>
-                        </Avatar>
+                        <div className='relative'>
+                          <Avatar>
+                            <AvatarFallback className={cn(contact.unread_count > 0 && 'bg-primary text-primary-foreground')}>
+                              {getInitials(contact.name, contact.phone_number)}
+                            </AvatarFallback>
+                          </Avatar>
+                          {contact.unread_count > 0 && (
+                            <span className='absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground'>
+                              {contact.unread_count > 99 ? '99+' : contact.unread_count}
+                            </span>
+                          )}
+                        </div>
                         <div className='flex-1 min-w-0'>
                           <div className='flex items-center justify-between'>
-                            <span className='font-medium truncate'>
+                            <span className={cn('truncate', contact.unread_count > 0 ? 'font-bold text-foreground' : 'font-medium')}>
                               {contact.name || contact.phone_number}
                             </span>
                           </div>
@@ -663,7 +661,7 @@ export function Chats({ initialContactWaId }: ChatsProps = {}) {
                               </Badge>
                             )}
                           </div>
-                          <span className='text-xs text-muted-foreground'>
+                          <span className={cn('text-xs', contact.unread_count > 0 ? 'text-primary font-medium' : 'text-muted-foreground')}>
                             {safeFormat(contact.last_message_at, 'MMM d, HH:mm', 'No messages')}
                           </span>
                           {contact.is_resolved && contact.resolved_by_agent_id && (

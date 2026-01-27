@@ -33,6 +33,9 @@ export function ChatNotificationListener() {
   })
   const promptIssuedRef = useRef(false)
 
+  // Track recently shown notifications to prevent duplicates
+  const recentNotificationsRef = useRef<Set<string>>(new Set())
+
   const isNotificationsSupported = useMemo(
     () => typeof window !== 'undefined' && 'Notification' in window,
     []
@@ -116,6 +119,19 @@ export function ChatNotificationListener() {
       const payload = event as NewMessageEvent
       if (!payload.message || payload.message.direction !== 'inbound') return
 
+      // Generate a unique ID for this notification based on message
+      const messageId = payload.message.id?.toString() || `${payload.wa_id}-${Date.now()}`
+
+      // Prevent duplicate notifications for the same message
+      if (recentNotificationsRef.current.has(messageId)) {
+        return
+      }
+      recentNotificationsRef.current.add(messageId)
+      // Clean up after 10 seconds
+      setTimeout(() => {
+        recentNotificationsRef.current.delete(messageId)
+      }, 10000)
+
       // Get notification settings from store
       const {
         toastNotificationsEnabled,
@@ -139,6 +155,7 @@ export function ChatNotificationListener() {
       // Show toast notification
       if (toastNotificationsEnabled) {
         toast.info(senderName, {
+          id: `new-msg-${messageId}`, // Unique ID prevents duplicates
           description: preview,
           action: {
             label: 'Open chat',

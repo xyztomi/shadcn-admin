@@ -10,10 +10,25 @@ import { ThemeSwitch } from '@/components/theme-switch'
 import { SidebarNav } from './components/sidebar-nav'
 
 const sidebarNavItems = [
+  // Operations group
+  {
+    title: 'Operations',
+    isGroup: true,
+  },
   {
     title: 'Shifts',
     href: '/settings',
     icon: <Clock size={18} />,
+  },
+  {
+    title: 'Quick Replies',
+    href: '/settings/quick-replies',
+    icon: <Zap size={18} />,
+  },
+  // Content group
+  {
+    title: 'Content',
+    isGroup: true,
   },
   {
     title: 'Tags',
@@ -21,19 +36,26 @@ const sidebarNavItems = [
     icon: <Tags size={18} />,
   },
   {
-    title: 'Quick Replies',
-    href: '/settings/quick-replies',
-    icon: <Zap size={18} />,
-  },
-  {
     title: 'Media Assets',
     href: '/settings/media-assets',
     icon: <ImageIcon size={18} />,
+  },
+  // System group (admin only)
+  {
+    title: 'System',
+    isGroup: true,
+    adminOnly: true,
   },
   {
     title: 'Webhook',
     href: '/settings/webhook',
     icon: <Link2 size={18} />,
+    adminOnly: true,
+  },
+  // Preferences group
+  {
+    title: 'Preferences',
+    isGroup: true,
   },
   {
     title: 'Appearance',
@@ -45,11 +67,6 @@ const sidebarNavItems = [
     href: '/settings/notifications',
     icon: <Bell size={18} />,
   },
-  // {
-  //   title: 'Display',
-  //   href: '/settings/display',
-  //   icon: <Monitor size={18} />,
-  // },
 ]
 
 export function Settings() {

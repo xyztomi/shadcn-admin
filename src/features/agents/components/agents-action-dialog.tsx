@@ -139,7 +139,12 @@ export function AgentsActionDialog() {
           department: data.department,
           booth: data.booth,
           role: data.role,
-          shift_id: shiftId,
+        }
+        // Handle shift assignment
+        if (shiftId) {
+          payload.shift_id = shiftId
+        } else {
+          payload.clear_shift = true
         }
         if (data.password) {
           payload.password = data.password

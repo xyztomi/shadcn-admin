@@ -38,6 +38,7 @@ export interface UpdateAgentPayload {
   department?: AgentDepartment
   booth?: AgentBooth
   shift_id?: number | null
+  clear_shift?: boolean
 }
 
 // List agents with filters (auto-filtered by selected department)

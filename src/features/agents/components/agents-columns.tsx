@@ -169,15 +169,13 @@ export const agentsColumns: ColumnDef<Agent>[] = [
   {
     id: 'status',
     accessorFn: (row) => {
-      if (!row.is_online) return 'offline'
-      if (row.is_available) return 'available'
-      return 'online'
+      return row.is_online ? 'online' : 'offline'
     },
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Status' />
     ),
     cell: ({ row }) => {
-      const { is_online, is_available } = row.original
+      const { is_online } = row.original
       return (
         <div className='flex items-center gap-2'>
           <span
@@ -187,16 +185,15 @@ export const agentsColumns: ColumnDef<Agent>[] = [
             )}
           />
           <span className='text-sm'>
-            {is_online ? (is_available ? 'Available' : 'Busy') : 'Offline'}
+            {is_online ? 'Online' : 'Offline'}
           </span>
         </div>
       )
     },
     filterFn: (row, _id, value) => {
-      const { is_online, is_available } = row.original
+      const { is_online } = row.original
       if (value.includes('online') && is_online) return true
       if (value.includes('offline') && !is_online) return true
-      if (value.includes('available') && is_available) return true
       return false
     },
   },

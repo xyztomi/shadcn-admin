@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { Loader2, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
@@ -28,13 +28,10 @@ const formSchema = z.object({
     .min(1, 'Please enter your password'),
 })
 
-interface UserAuthFormProps extends React.HTMLAttributes<HTMLFormElement> {
-  redirectTo?: string
-}
+interface UserAuthFormProps extends React.HTMLAttributes<HTMLFormElement> { }
 
 export function UserAuthForm({
   className,
-  redirectTo,
   ...props
 }: UserAuthFormProps) {
   const navigate = useNavigate()
@@ -92,18 +89,12 @@ export function UserAuthForm({
           control={form.control}
           name='password'
           render={({ field }) => (
-            <FormItem className='relative'>
+            <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
                 <PasswordInput placeholder='********' {...field} />
               </FormControl>
               <FormMessage />
-              <Link
-                to='/forgot-password'
-                className='absolute end-0 -top-0.5 text-sm font-medium text-muted-foreground hover:opacity-75'
-              >
-                Forgot password?
-              </Link>
             </FormItem>
           )}
         />

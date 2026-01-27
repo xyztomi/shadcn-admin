@@ -132,7 +132,6 @@ export function AgentsTable({ data, search, navigate, isLoading }: DataTableProp
             title: 'Status',
             options: [
               { label: 'Online', value: 'online' },
-              { label: 'Available', value: 'available' },
               { label: 'Offline', value: 'offline' },
             ],
           },

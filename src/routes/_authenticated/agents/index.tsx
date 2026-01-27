@@ -7,7 +7,7 @@ const agentsSearchSchema = z.object({
   page: z.number().optional().catch(1),
   pageSize: z.number().optional().catch(10),
   status: z
-    .array(z.union([z.literal('online'), z.literal('offline'), z.literal('busy')]))
+    .array(z.union([z.literal('online'), z.literal('offline')]))
     .optional()
     .catch([]),
   name: z.string().optional().catch(''),

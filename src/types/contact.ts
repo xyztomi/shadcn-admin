@@ -29,6 +29,8 @@ export interface Contact {
   resolved_at: string | null
   notes: string | null
   last_message_at: string | null
+  /** When customer last sent a message (for 24-hour WhatsApp window tracking) */
+  last_inbound_message_at: string | null
   unread_count: number
   tags: ContactTag[]
   created_at: string

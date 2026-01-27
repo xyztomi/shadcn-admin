@@ -16,6 +16,7 @@ import {
   RotateCcw,
   Paperclip,
   Filter,
+  AlertTriangle,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -188,6 +189,56 @@ function safeFormat(dateStr: string | null | undefined, formatStr: string, fallb
   }
 }
 
+/**
+ * Check if the 24-hour WhatsApp messaging window has expired.
+ * Returns info about the window status.
+ */
+function get24HourWindowStatus(lastInboundMessageAt: string | null | undefined): {
+  isExpired: boolean
+  hoursAgo: number | null
+  message: string | null
+} {
+  if (!lastInboundMessageAt) {
+    return {
+      isExpired: true,
+      hoursAgo: null,
+      message: 'No customer message received yet. You need to use a message template.',
+    }
+  }
+
+  try {
+    const lastInbound = new Date(lastInboundMessageAt)
+    if (isNaN(lastInbound.getTime())) {
+      return { isExpired: false, hoursAgo: null, message: null }
+    }
+
+    const now = new Date()
+    const hoursDiff = (now.getTime() - lastInbound.getTime()) / (1000 * 60 * 60)
+
+    if (hoursDiff >= 24) {
+      return {
+        isExpired: true,
+        hoursAgo: Math.floor(hoursDiff),
+        message: `Customer last replied ${Math.floor(hoursDiff)} hours ago. Regular messages will fail - use a message template instead.`,
+      }
+    }
+
+    // Warning when close to expiry (22+ hours)
+    if (hoursDiff >= 22) {
+      const hoursRemaining = Math.floor(24 - hoursDiff)
+      return {
+        isExpired: false,
+        hoursAgo: Math.floor(hoursDiff),
+        message: `⚠️ Messaging window expires in ~${hoursRemaining} hour${hoursRemaining === 1 ? '' : 's'}. Customer last replied ${Math.floor(hoursDiff)} hours ago.`,
+      }
+    }
+
+    return { isExpired: false, hoursAgo: Math.floor(hoursDiff), message: null }
+  } catch {
+    return { isExpired: false, hoursAgo: null, message: null }
+  }
+}
+
 interface ChatsProps {
   /** wa_id to auto-select from URL search param */
   initialContactWaId?: string
@@ -205,6 +256,7 @@ export function Chats({ initialContactWaId }: ChatsProps = {}) {
   const [pendingContactWaId, setPendingContactWaId] = useState<string | undefined>(initialContactWaId)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messageInputRef = useRef<HTMLInputElement>(null)
+  const lastMessageIdRef = useRef<string | number | null>(null)
   const currentUser = useAuthStore((state) => state.auth.user)
   const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'superuser'
 
@@ -268,9 +320,10 @@ export function Chats({ initialContactWaId }: ChatsProps = {}) {
   const resolveMutation = useResolveContact()
   const unresolveMutation = useUnresolveContact()
 
-  // Handle WebSocket events for toast notifications on failed messages
+  // Handle WebSocket events for toast notifications
   const handleWebSocketEvent = useCallback(
-    (event: { type: string; status?: string; error?: string }) => {
+    (event: { type: string; status?: string; error?: string; wa_id?: string; message?: { direction?: string; content?: string; sender_name?: string } }) => {
+      // Handle failed message delivery
       if (event.type === 'message_status_update' && event.status === 'failed') {
         const errorMessage = event.error || 'Message failed to deliver'
         toast.error('Message delivery failed', {
@@ -278,8 +331,21 @@ export function Chats({ initialContactWaId }: ChatsProps = {}) {
           duration: 8000,
         })
       }
+
+      // Handle new inbound messages - show notification if not viewing that chat
+      if (event.type === 'new_message' && event.message?.direction === 'inbound') {
+        const isViewingThisChat = selectedContact?.wa_id === event.wa_id
+        if (!isViewingThisChat) {
+          const senderName = event.message.sender_name || 'New message'
+          const content = event.message.content || ''
+          toast.info(senderName, {
+            description: content.length > 50 ? content.slice(0, 50) + '...' : content,
+            duration: 5000,
+          })
+        }
+      }
     },
-    []
+    [selectedContact?.wa_id]
   )
 
   // WebSocket for real-time updates
@@ -331,10 +397,32 @@ export function Chats({ initialContactWaId }: ChatsProps = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only trigger on wa_id change, not on mutation or contact object changes
   }, [selectedContact?.wa_id])
 
-  // Scroll to bottom when new messages arrive
+  // Get the last message ID to detect new messages
+  const lastMessage = messages[messages.length - 1]
+  const lastMessageId = lastMessage?.id ?? null
+
+  // Scroll to bottom when new messages arrive or when switching contacts
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages.length])
+    // Only scroll if we have a new message (not initial load of older messages)
+    if (lastMessageId && lastMessageId !== lastMessageIdRef.current) {
+      // Use setTimeout to ensure DOM has updated
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
+      lastMessageIdRef.current = lastMessageId
+    }
+  }, [lastMessageId])
+
+  // Also scroll when selecting a new contact (instant scroll)
+  useEffect(() => {
+    if (selectedContact) {
+      lastMessageIdRef.current = null // Reset on contact change
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'instant' })
+      }, 150)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only trigger on wa_id change
+  }, [selectedContact?.wa_id])
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -855,6 +943,32 @@ export function Chats({ initialContactWaId }: ChatsProps = {}) {
                     </AlertDescription>
                   </Alert>
                 )}
+
+                {/* 24-Hour WhatsApp Window Warning */}
+                {(() => {
+                  const windowStatus = get24HourWindowStatus(selectedContact?.last_inbound_message_at)
+                  if (windowStatus.isExpired) {
+                    return (
+                      <Alert variant='destructive' className='mb-2'>
+                        <AlertTriangle className='h-4 w-4' />
+                        <AlertDescription>
+                          {windowStatus.message}
+                        </AlertDescription>
+                      </Alert>
+                    )
+                  }
+                  if (windowStatus.message) {
+                    return (
+                      <Alert className='mb-2 border-amber-500/50 bg-amber-50 text-amber-800 dark:bg-amber-950/20 dark:text-amber-200'>
+                        <Clock className='h-4 w-4' />
+                        <AlertDescription>
+                          {windowStatus.message}
+                        </AlertDescription>
+                      </Alert>
+                    )
+                  }
+                  return null
+                })()}
 
                 {/* Message Input */}
                 <form onSubmit={handleSendMessage} className='flex w-full flex-none gap-2'>

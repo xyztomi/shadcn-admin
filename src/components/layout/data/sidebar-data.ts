@@ -13,6 +13,7 @@ import {
   ImageIcon,
   Link2,
   Megaphone,
+  BarChart3,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -34,6 +35,12 @@ export const sidebarData: SidebarData = {
           title: 'Chats',
           url: '/chats',
           icon: MessagesSquare,
+        },
+        {
+          title: 'Analytics',
+          url: '/analytics',
+          icon: BarChart3,
+          roles: ['superuser', 'admin'],
         },
       ],
     },

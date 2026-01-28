@@ -1,6 +1,47 @@
-// Notification sound utility using Web Audio API
-// Creates a pleasant notification sound without needing an external audio file
+// Notification sound utility
+// Plays a ringtone when new messages arrive
 
+// Cache the audio element for faster playback
+let cachedAudio: HTMLAudioElement | null = null
+const SOUND_URL = '/sounds/notification.mp3'
+
+// Preload the audio file for instant playback
+function preloadAudio(): HTMLAudioElement | null {
+  if (typeof window === 'undefined') return null
+
+  if (!cachedAudio) {
+    cachedAudio = new Audio(SOUND_URL)
+    cachedAudio.preload = 'auto'
+  }
+  return cachedAudio
+}
+
+// Try to preload on module load
+if (typeof window !== 'undefined') {
+  preloadAudio()
+}
+
+export function playNotificationSound(volume: number = 0.5): void {
+  try {
+    // First try to play the MP3 file
+    const audio = preloadAudio()
+    if (audio) {
+      audio.volume = Math.max(0, Math.min(1, volume))
+      audio.currentTime = 0 // Reset to start
+      audio.play().catch(() => {
+        // If MP3 fails, fallback to Web Audio API
+        playFallbackSound(volume)
+      })
+    } else {
+      playFallbackSound(volume)
+    }
+  } catch {
+    // Fallback to synthesized sound
+    playFallbackSound(volume)
+  }
+}
+
+// Fallback: synthesized notification sound using Web Audio API
 let audioContext: AudioContext | null = null
 
 function getAudioContext(): AudioContext {
@@ -14,7 +55,7 @@ function getAudioContext(): AudioContext {
   return audioContext
 }
 
-export function playNotificationSound(volume: number = 0.5): void {
+function playFallbackSound(volume: number = 0.5): void {
   try {
     const ctx = getAudioContext()
 
@@ -24,45 +65,51 @@ export function playNotificationSound(volume: number = 0.5): void {
     }
 
     const now = ctx.currentTime
+    const clampedVolume = Math.max(0, Math.min(1, volume))
 
-    // Create oscillator for the main tone
-    const oscillator = ctx.createOscillator()
-    const gainNode = ctx.createGain()
+    // Create three separate oscillators for distinct tones (like a ringtone)
+    const frequencies = [587.33, 783.99, 987.77] // D5, G5, B5
+    const durations = [0.12, 0.12, 0.16] // Each note duration
+    let startTime = now
 
-    oscillator.connect(gainNode)
-    gainNode.connect(ctx.destination)
+    frequencies.forEach((freq, index) => {
+      const oscillator = ctx.createOscillator()
+      const gainNode = ctx.createGain()
 
-    // Pleasant notification sound - two quick ascending tones
-    oscillator.type = 'sine'
-    oscillator.frequency.setValueAtTime(880, now) // A5
-    oscillator.frequency.setValueAtTime(1108.73, now + 0.1) // C#6
+      oscillator.connect(gainNode)
+      gainNode.connect(ctx.destination)
 
-    // Volume envelope
-    gainNode.gain.setValueAtTime(0, now)
-    gainNode.gain.linearRampToValueAtTime(volume * 0.3, now + 0.02)
-    gainNode.gain.linearRampToValueAtTime(volume * 0.2, now + 0.1)
-    gainNode.gain.linearRampToValueAtTime(volume * 0.3, now + 0.12)
-    gainNode.gain.linearRampToValueAtTime(0, now + 0.25)
+      oscillator.type = 'sine'
+      oscillator.frequency.setValueAtTime(freq, startTime)
 
-    oscillator.start(now)
-    oscillator.stop(now + 0.25)
+      // Volume envelope for each note - attack, sustain, release
+      const noteStart = startTime
+      const noteDuration = durations[index]
+      const attackTime = 0.01
+      const releaseTime = 0.03
+
+      gainNode.gain.setValueAtTime(0, noteStart)
+      gainNode.gain.linearRampToValueAtTime(
+        clampedVolume * 0.5,
+        noteStart + attackTime
+      )
+      gainNode.gain.setValueAtTime(
+        clampedVolume * 0.5,
+        noteStart + noteDuration - releaseTime
+      )
+      gainNode.gain.linearRampToValueAtTime(0, noteStart + noteDuration)
+
+      oscillator.start(noteStart)
+      oscillator.stop(noteStart + noteDuration)
+
+      startTime += noteDuration
+    })
   } catch {
     // Audio not supported or blocked - fail silently
   }
 }
 
-// Alternative: Use a pre-made notification sound file
-export function playNotificationSoundFile(
-  volume: number = 0.5,
-  soundUrl: string = '/sounds/notification.mp3'
-): void {
-  try {
-    const audio = new Audio(soundUrl)
-    audio.volume = Math.max(0, Math.min(1, volume))
-    audio.play().catch(() => {
-      // Autoplay blocked - fail silently
-    })
-  } catch {
-    // Audio not supported - fail silently
-  }
+// Test function to play sound on demand (useful for settings page)
+export function testNotificationSound(volume: number = 0.5): void {
+  playNotificationSound(volume)
 }

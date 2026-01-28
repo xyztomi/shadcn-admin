@@ -1,6 +1,6 @@
 import { type Row } from '@tanstack/react-table'
 import { useNavigate } from '@tanstack/react-router'
-import { MoreHorizontal, MessageSquare, UserPlus, Tag, Edit, Trash2 } from 'lucide-react'
+import { MoreHorizontal, MessageSquare, Edit, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -27,16 +27,6 @@ export function ContactsRowActions({ row }: ContactsRowActionsProps) {
     navigate({ to: '/chats', search: { wa_id: row.original.wa_id } })
   }
 
-  const handleAssign = () => {
-    setCurrentContact(row.original)
-    setOpen('assign')
-  }
-
-  const handleTag = () => {
-    setCurrentContact(row.original)
-    setOpen('tag')
-  }
-
   const handleEdit = () => {
     setCurrentContact(row.original)
     setOpen('edit')
@@ -61,14 +51,6 @@ export function ContactsRowActions({ row }: ContactsRowActionsProps) {
           Open Chat
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleAssign}>
-          <UserPlus className='mr-2 h-4 w-4' />
-          Assign Agent
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleTag}>
-          <Tag className='mr-2 h-4 w-4' />
-          Change Service Tag
-        </DropdownMenuItem>
         <DropdownMenuItem onClick={handleEdit}>
           <Edit className='mr-2 h-4 w-4' />
           Edit Contact

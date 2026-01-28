@@ -108,42 +108,6 @@ export function useUpdateContact() {
   })
 }
 
-// Tag contact with service
-export function useTagContact() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: async ({
-      waId,
-      serviceTag,
-    }: {
-      waId: string
-      serviceTag: ServiceTag
-    }) => {
-      const response = await api.post(`/contacts/${waId}/tag`, {
-        service_tag: serviceTag,
-      })
-      return response.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['contacts'] })
-    },
-  })
-}
-
-// Remove service tag from contact
-export function useRemoveServiceTag() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: async (waId: string) => {
-      const response = await api.delete(`/contacts/${waId}/tag`)
-      return response.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['contacts'] })
-    },
-  })
-}
-
 // Delete contact (admin only)
 export function useDeleteContact() {
   const queryClient = useQueryClient()

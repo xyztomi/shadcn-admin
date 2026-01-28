@@ -15,6 +15,7 @@ import {
 } from '@/types'
 import { useDepartmentStore } from '@/stores/department-store'
 import { unreadStore } from '@/stores/unread-store'
+import { useWebSocketStatus } from '@/stores/websocket-store'
 import { api } from './client'
 
 // Re-export for convenience
@@ -33,6 +34,8 @@ export interface UnreadSummary {
 
 // Get conversation history with cursor-based pagination
 export function useConversation(waId: string, limit = 50) {
+  const { isConnected } = useWebSocketStatus()
+
   return useInfiniteQuery<
     ConversationResponse,
     Error,
@@ -58,8 +61,8 @@ export function useConversation(waId: string, limit = 50) {
       return String(lastPage.messages[lastPage.messages.length - 1].id)
     },
     enabled: !!waId,
-    // Poll every 5 seconds as fallback when WebSocket isn't working
-    refetchInterval: 5000,
+    // Only poll as fallback when WebSocket isn't connected
+    refetchInterval: isConnected ? false : 5000,
     refetchIntervalInBackground: false,
   })
 }
@@ -105,6 +108,8 @@ export function useMarkAsRead() {
 
 // Get unread count for a contact
 export function useUnreadCount(waId: string) {
+  const { isConnected } = useWebSocketStatus()
+
   return useQuery({
     queryKey: ['unread', waId],
     queryFn: async (): Promise<{ count: number }> => {
@@ -112,7 +117,8 @@ export function useUnreadCount(waId: string) {
       return response.data
     },
     enabled: !!waId,
-    refetchInterval: 30 * 1000, // Refresh every 30 seconds
+    // Only poll as fallback when WebSocket isn't connected
+    refetchInterval: isConnected ? false : 30 * 1000,
   })
 }
 
@@ -134,8 +140,9 @@ export function useDeleteChat() {
 // Uses useSyncExternalStore for instant WebSocket updates + REST API for sync
 export function useUnreadSummary() {
   const { selectedDepartment } = useDepartmentStore()
+  const { isConnected } = useWebSocketStatus()
 
-  // REST API query to sync the store periodically
+  // REST API query to sync the store periodically (only when WebSocket isn't connected)
   useQuery({
     queryKey: ['chat', 'unread-summary', selectedDepartment],
     queryFn: async (): Promise<UnreadSummary> => {
@@ -152,7 +159,8 @@ export function useUnreadSummary() {
       unreadStore.syncFromApi(response.data)
       return response.data
     },
-    refetchInterval: 15_000,
+    // Only poll as fallback when WebSocket isn't connected
+    refetchInterval: isConnected ? false : 15_000,
     refetchOnWindowFocus: true,
   })
 

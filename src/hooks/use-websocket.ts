@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/auth-store'
 import { unreadStore } from '@/stores/unread-store'
+import { websocketStore } from '@/stores/websocket-store'
 
 type WebSocketEventType =
   | 'connected'
@@ -136,6 +137,8 @@ export function useWebSocket(onEvent?: WSEventHandler) {
         clearTimeout(globalReconnectTimeout)
         globalReconnectTimeout = null
       }
+      // Update connection status
+      websocketStore.setConnected(true)
     }
 
     globalWs.onmessage = (event) => {
@@ -228,6 +231,8 @@ export function useWebSocket(onEvent?: WSEventHandler) {
 
     globalWs.onclose = () => {
       globalWs = null
+      // Update connection status
+      websocketStore.setConnected(false)
       // Attempt to reconnect after 5 seconds if still have token
       const token = useAuthStore.getState().auth.accessToken
       if (token && !globalReconnectTimeout && connectionCount > 0) {

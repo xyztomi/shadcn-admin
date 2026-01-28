@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { type Contact, ServiceTag, BoothTag } from '@/types'
 import { useDepartmentStore } from '@/stores/department-store'
+import { useWebSocketStatus } from '@/stores/websocket-store'
 import { api } from './client'
 
 // Re-export for convenience
@@ -42,6 +43,7 @@ export function useCreateContact() {
 // List contacts with filters (auto-filtered by selected department)
 export function useContacts(filters?: ContactFilters) {
   const { selectedDepartment } = useDepartmentStore()
+  const { isConnected } = useWebSocketStatus()
 
   const params = new URLSearchParams()
 
@@ -64,8 +66,8 @@ export function useContacts(filters?: ContactFilters) {
       const response = await api.get(`/contacts?${params.toString()}`)
       return response.data
     },
-    // Poll every 10 seconds as fallback when WebSocket isn't working
-    refetchInterval: 10000,
+    // Only poll as fallback when WebSocket isn't connected
+    refetchInterval: isConnected ? false : 10000,
     refetchIntervalInBackground: false,
   })
 }

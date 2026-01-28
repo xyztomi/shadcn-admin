@@ -77,7 +77,10 @@ export function useUploadMediaAsset() {
       return response.data as MediaAsset
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['media-assets'] })
+      queryClient.invalidateQueries({
+        queryKey: ['media-assets'],
+        refetchType: 'all',
+      })
     },
   })
 }
@@ -100,7 +103,10 @@ export function useUpdateMediaAsset() {
       return response.data as MediaAsset
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['media-assets'] })
+      queryClient.invalidateQueries({
+        queryKey: ['media-assets'],
+        refetchType: 'all',
+      })
     },
   })
 }
@@ -114,7 +120,10 @@ export function useDeleteMediaAsset() {
       await api.delete(`/media-assets/${id}`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['media-assets'] })
+      queryClient.invalidateQueries({
+        queryKey: ['media-assets'],
+        refetchType: 'all',
+      })
     },
   })
 }

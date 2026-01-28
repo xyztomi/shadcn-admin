@@ -78,7 +78,15 @@ type WSEventHandler = (event: WebSocketEvent) => void
 
 // Connect directly to backend WebSocket (bypasses Vite proxy issues)
 function getWebSocketUrl(token: string): string {
-  // In production, use the same host as the app
+  // If VITE_API_URL is set, use it for WebSocket connection
+  const apiUrl = import.meta.env.VITE_API_URL
+  if (apiUrl) {
+    // Convert http(s):// to ws(s)://
+    const wsUrl = apiUrl.replace(/^http/, 'ws')
+    return `${wsUrl}/ws?token=${token}`
+  }
+
+  // In production without VITE_API_URL, use the same host as the app
   if (import.meta.env.PROD) {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
     return `${protocol}//${window.location.host}/ws?token=${token}`

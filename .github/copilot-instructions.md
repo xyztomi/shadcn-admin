@@ -1,231 +1,196 @@
-# Copilot Instructions for WA CRM Frontend
-
-## Project Context
-
-This is **WA CRM** - a WhatsApp CRM dashboard for managing customer conversations. Built on the shadcn-admin template, integrating with a FastAPI backend.
+# WA CRM Frontend - AI Agent Guide
 
 ## Tech Stack
 
-- **React 19 + Vite + SWC** - Modern React with fast builds
-- **TanStack Router** - File-based routing with auto-code-splitting
-- **TanStack Query** - Server state management for API calls
-- **TanStack Table** - Data tables with sorting/filtering/pagination
-- **Shadcn UI** (Tailwind CSS 4 + Radix) - "new-york" style variant
-- **Zustand** - Global client state (auth)
-- **Axios** - HTTP client for backend API
+- **React 19 + Vite + SWC** - Fast builds with HMR
+- **TanStack Router** - File-based routing with code-splitting
+- **TanStack Query** - Server state, caching, mutations
+- **TanStack Table** - Data tables with filters/pagination
+- **Shadcn UI** - "new-york" variant, Tailwind CSS 4, RTL support
+- **Zustand** - Client state (auth only)
+- **Axios** - HTTP client with JWT interceptor
 
-## Backend API
+## Project Structure
 
-**Base URL:** `http://localhost:8000/api/v1`
-
-**Authentication:** JWT Bearer tokens in Authorization header
-```typescript
-headers: { 'Authorization': `Bearer ${token}` }
-```
-
-**Response format:** Direct JSON (no wrapper). Errors return `{ "detail": "message" }`
-
-**Test accounts:** `admin/admin123`, `manager/manager123`, `cs_viu_1/agent123`
-
-## Directory Structure
 ```
 src/
-├── features/         # Domain modules - ADD API INTEGRATION HERE
+├── api/              # API client + TanStack Query hooks
+│   ├── client.ts     # Axios instance with auth interceptor
+│   ├── contacts.ts   # useContacts, useContact, etc.
+│   └── chat.ts       # useConversation, useSendMessage
+├── features/         # Domain modules (main pages)
 │   └── {domain}/
-│       ├── index.tsx           # Page component
-│       ├── components/         # Domain UI components
-│       ├── api/               # API hooks (TanStack Query) - CREATE THIS
-│       └── data/              # Schema, types, constants
-├── routes/           # TanStack Router (thin wrappers to features)
+│       ├── index.tsx       # Page component
+│       ├── components/     # Domain UI
+│       ├── constants/      # Domain constants
+│       └── data/           # Types, schemas
+├── routes/           # TanStack Router (thin wrappers)
 ├── components/
-│   ├── ui/           # Shadcn components (avoid direct edits)
-│   ├── data-table/   # Reusable table components
-│   └── layout/       # App shell, sidebar, header
-├── context/          # React context (theme, layout, search)
-├── hooks/            # Shared hooks
-├── stores/           # Zustand stores (auth-store.ts)
+│   ├── ui/           # Shadcn (don't edit directly)
+│   └── layout/       # App shell, sidebar
+├── hooks/            # Shared hooks (use-websocket, etc.)
+├── stores/           # Zustand (auth-store.ts)
 ├── lib/              # Utilities (cn, cookies, error handling)
-└── api/              # Shared API client config - CREATE THIS
+└── styles/           # Tailwind config, theme.css
 ```
 
-## API Endpoints Reference
+## Key Patterns
 
-### Auth (`/api/v1/auth`)
-- `POST /auth/login` → `{ access_token, token_type }`
-- `GET /auth/me` → Current agent info
-- `PATCH /auth/me` → Update profile
-- `POST /auth/change-password`
-
-### Contacts (`/api/v1/contacts`)
-- `GET /contacts` → List (filters: `service_tag`, `assigned_agent_id`, `is_active`, `unassigned`)
-- `GET /contacts/{wa_id}` → Single contact
-- `PATCH /contacts/{wa_id}` → Update contact
-- `POST /contacts/{wa_id}/assign` → Assign to agent
-- `POST /contacts/{wa_id}/unassign` → Remove assignment
-
-### Chat (`/api/v1/chat`)
-- `GET /chat/{wa_id}` → Conversation history (params: `limit`, `before_id`)
-- `POST /chat/{wa_id}/send` → Send message `{ text }`
-- `POST /chat/{wa_id}/mark-read` → Mark as read
-
-### Agents (`/api/v1/agents`)
-- `GET /agents` → List (filters: `department`, `is_available`, `is_online`)
-- `POST /agents` → Create (admin only)
-- `PATCH /agents/{id}/status` → Update online/available
-
-### Stats (`/api/v1/stats`)
-- `GET /stats/overview` → Dashboard stats
-- `GET /stats/agents` → Agent performance
-
-### WebSocket
-- `ws://localhost:8000/ws?token={jwt}` → Real-time updates
-
-## WhatsApp CRM Domain Concepts
-
-### Contact Identification
-- **`wa_id`** (WhatsApp ID) is the primary identifier for contacts, NOT database IDs
-- Format: international phone number without `+` (e.g., `6281234567890`)
-- All contact/chat endpoints use `wa_id` in the URL path
-
-### Dual-Department Model
-The system routes contacts to two service departments:
+### API Integration ([api/](src/api/))
 ```typescript
-type ServiceTag = 'viufinder' | 'viufinder_xp'
-type AgentDepartment = 'viufinder' | 'viufinder_xp'
-```
-- Filter contacts by `service_tag` to show department-specific queues
-- Agents belong to one department and only see their department's contacts
-- Admins/managers can see all departments
-
-### Agent Workload
-Track agent capacity for assignment UI:
-```typescript
-interface Agent {
-  active_chats: number   // Current assigned conversations
-  max_chats: number      // Maximum allowed (0 = unlimited)
-  is_available: boolean  // Toggle for accepting new chats
-  is_online: boolean     // Online status
-}
-```
-
-### Message Pagination
-Chat history uses **cursor-based pagination** with `before_id`:
-```typescript
-// First load
-GET /chat/{wa_id}?limit=50
-
-// Load older messages
-GET /chat/{wa_id}?limit=50&before_id={oldest_message_id}
-```
-
-### WebSocket Events
-Handle these real-time events from `ws://localhost:8000/ws?token={jwt}`:
-- `new_message` - Incoming WhatsApp message
-- `message_status` - Delivery/read receipt updates
-- `agent_assigned` - Contact assignment changes
-
-## Critical Patterns
-
-### Route-to-Feature Connection
-Routes are thin wrappers that delegate to feature components:
-```tsx
-// routes/_authenticated/users/index.tsx
-export const Route = createFileRoute('/_authenticated/users/')({
-  component: Users,
-  validateSearch: searchSchema, // Zod schema for URL params
-})
-```
-Feature components live in `src/features/{domain}/index.tsx`.
-
-### Backend API Integration Pattern
-Create API hooks in each feature using TanStack Query:
-```tsx
-// features/contacts/api/use-contacts.ts
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+// api/client.ts - pre-configured with JWT
 import { api } from '@/api/client'
 
-export function useContacts(filters?: { service_tag?: string; unassigned?: boolean }) {
-  const params = new URLSearchParams(filters as any).toString()
+// Query hooks pattern
+export function useContacts(filters?: ContactFilters) {
   return useQuery({
     queryKey: ['contacts', filters],
-    queryFn: () => api.get(`/contacts?${params}`).then(res => res.data),
+    queryFn: () => api.get('/contacts', { params: filters }).then(r => r.data),
   })
 }
 
+// Mutation pattern with cache invalidation
 export function useAssignContact() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ wa_id, agent_id }: { wa_id: string; agent_id: number }) =>
-      api.post(`/contacts/${wa_id}/assign`, { agent_id }),
+    mutationFn: ({ wa_id, agent_id }) => api.post(`/contacts/${wa_id}/assign`, { agent_id }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['contacts'] }),
   })
 }
 ```
 
-### Feature Module Pattern (Provider + Dialogs)
-Each CRUD feature uses this structure (see [users](src/features/users/index.tsx)):
+### WebSocket Integration ([hooks/use-websocket.ts](src/hooks/use-websocket.ts))
+```typescript
+// Singleton connection, auto-reconnect, TanStack Query integration
+const { isConnected } = useWebSocket((event) => {
+  if (event.type === 'new_message') {
+    // Handle real-time message
+  }
+})
+
+// Events: new_message, message_status, message_status_update, contact_update
+```
+
+### Feature Module Pattern
 ```tsx
-<ContactsProvider>        {/* Context for dialog state + current row */}
+// features/contacts/index.tsx
+<ContactsProvider>           {/* Context for dialog state */}
   <Header />
   <Main>
-    <ContactsTable />     {/* Table with URL-synced filters */}
+    <ContactsTable />        {/* Data table with URL-synced filters */}
   </Main>
-  <ContactsDialogs />     {/* All dialogs rendered together */}
+  <ContactsDialogs />        {/* All CRUD dialogs */}
 </ContactsProvider>
 ```
 
-### Dialog State Management
-Use `useDialogState<T>` hook for toggling dialogs:
-```tsx
-const [open, setOpen] = useDialogState<'add' | 'edit' | 'delete'>(null)
-setOpen('add')  // Opens 'add', closes if already 'add'
-```
+### Error Handling
+```typescript
+import { handleServerError } from '@/lib/handle-server-error'
 
-### URL-Synced Table State
-Use `useTableUrlState` hook to sync filters/pagination with URL:
-```tsx
-const { columnFilters, pagination, onColumnFiltersChange } = useTableUrlState({
-  search, navigate,
-  columnFilters: [
-    { columnId: 'status', searchKey: 'status', type: 'array' },
-  ],
+useMutation({
+  mutationFn: ...,
+  onError: handleServerError,  // Shows toast with backend error.detail
 })
 ```
 
-## UI Component Guidelines
+## Conventions
 
 ### Imports
-- Use `@/` path alias for all imports
-- Type-only imports required: `import { type User } from './schema'`
-- Shadcn components: `@/components/ui/{component}`
-- Custom components: `@/components/{component}`
+- Always use `@/` path alias
+- Type-only: `import { type User } from './schema'`
+- Icons: `lucide-react` only (not Radix icons)
 
 ### Styling
-- Use `cn()` utility for conditional classes: `cn('base-class', condition && 'conditional')`
-- Tailwind CSS 4 with CSS variables for theming (see [theme.css](src/styles/theme.css))
-- RTL support is built-in - use logical properties (`ms-`, `me-`, `start`, `end`)
+- `cn()` utility: `cn('base', condition && 'conditional')`
+- RTL built-in - use logical properties (`ms-`, `me-`, `start`, `end`)
+- Theme vars in [styles/theme.css](src/styles/theme.css)
+
+### ESLint Rules
+- **No `console.log`** - ESLint error
+- **Prefix unused vars with `_`**: `_unused`
+- **Type-only imports required**
 
 ### Modified Shadcn Components
-These components have RTL/custom modifications - **merge carefully** if updating via CLI:
-- `scroll-area`, `sonner`, `separator` (general modifications)
-- `dialog`, `dropdown-menu`, `select`, `sheet`, `sidebar`, `switch`, `table` (RTL)
+These have RTL/custom modifications - **merge carefully** when updating:
+- `scroll-area`, `sonner`, `separator`, `dialog`, `dropdown-menu`, `select`, `sheet`, `sidebar`, `switch`, `table`
+
+## Testing
+
+```bash
+npm run test              # Run all tests
+npm run test:watch        # Watch mode
+npm run test:coverage     # With coverage report
+```
+
+### Test Structure
+```
+src/__tests__/
+├── setup.ts              # Vitest setup, mocks
+├── components/           # Component tests
+├── hooks/                # Hook tests
+└── api/                  # API hook tests
+```
+
+### Test Patterns
+```typescript
+// Component test
+import { render, screen } from '@testing-library/react'
+import { TestWrapper } from '@/__tests__/setup'
+
+test('renders contact name', () => {
+  render(<ContactCard contact={mockContact} />, { wrapper: TestWrapper })
+  expect(screen.getByText('John Doe')).toBeInTheDocument()
+})
+
+// Hook test with MSW for API mocking
+import { renderHook, waitFor } from '@testing-library/react'
+import { useContacts } from '@/api/contacts'
+
+test('fetches contacts', async () => {
+  const { result } = renderHook(() => useContacts(), { wrapper: TestWrapper })
+  await waitFor(() => expect(result.current.isSuccess).toBe(true))
+  expect(result.current.data).toHaveLength(2)
+})
+```
 
 ## Commands
 
 ```bash
-npm run dev        # Start dev server (port 5173)
-npm run build      # Type-check + production build
-npm run lint       # ESLint check
-npm run format     # Prettier format
-npm run knip       # Find unused exports/dependencies
+npm run dev           # Dev server (port 5173)
+npm run build         # Type-check + production build
+npm run lint          # ESLint
+npm run format        # Prettier
+npm run knip          # Find unused exports/deps
+npm run test          # Vitest
 ```
 
-## Key Conventions
+## Deployment Notes
 
-1. **No console.log** - ESLint enforces `no-console: error`
-2. **Prefix unused vars with `_`** - `_unused` pattern for intentionally unused variables
-3. **Lucide icons** - Import from `lucide-react`, not Radix icons
-4. **Toast notifications** - Use `toast` from `sonner` for user feedback
-5. **Error handling** - Use `handleServerError` from `@/lib/handle-server-error` for API errors
-6. **Authentication** - Zustand store at `@/stores/auth-store` manages tokens/user
-7. **Cookies** - Use helpers from `@/lib/cookies` for persistence
+### Environment Variables
+```env
+VITE_API_URL=https://api.production.com  # Optional, defaults to /api/v1
+```
+
+### Production Build
+- Vite proxy only works in dev - production needs proper API URL or reverse proxy
+- WebSocket URL auto-switches: `ws://localhost:8000` (dev) → `wss://host/ws` (prod)
+
+## Domain Concepts
+
+### Contact Identification
+- **`wa_id`** is primary identifier (not DB id)
+- Format: international phone without `+` (e.g., `6281234567890`)
+- All endpoints use `wa_id` in URL path
+
+### Departments
+```typescript
+type ServiceTag = 'viufinder' | 'viufinder_xp'
+// Agents see only their department's contacts (except admin/manager)
+```
+
+### Message Pagination
+Cursor-based with `before_id`:
+```typescript
+GET /chat/{wa_id}?limit=50                    // First load
+GET /chat/{wa_id}?limit=50&before_id={id}     // Load older
+```

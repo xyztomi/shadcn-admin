@@ -262,6 +262,7 @@ const AuthenticatedDashboardAgentAgentIdRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof AuthenticatedIndexRoute
   '/clerk': typeof ClerkAuthenticatedRouteRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordRoute
@@ -276,7 +277,6 @@ export interface FileRoutesByFullPath {
   '/503': typeof errors503Route
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/profile': typeof AuthenticatedProfileRoute
-  '/': typeof AuthenticatedIndexRoute
   '/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
   '/dashboard/agent': typeof AuthenticatedDashboardAgentRouteWithChildren
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
@@ -289,12 +289,12 @@ export interface FileRoutesByFullPath {
   '/clerk/sign-in': typeof ClerkauthSignInRoute
   '/clerk/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/user-management': typeof ClerkAuthenticatedUserManagementRoute
-  '/agents': typeof AuthenticatedAgentsIndexRoute
-  '/bot-handlers': typeof AuthenticatedBotHandlersIndexRoute
-  '/broadcast': typeof AuthenticatedBroadcastIndexRoute
-  '/chats': typeof AuthenticatedChatsIndexRoute
-  '/contacts': typeof AuthenticatedContactsIndexRoute
-  '/interactive-message': typeof AuthenticatedInteractiveMessageIndexRoute
+  '/agents/': typeof AuthenticatedAgentsIndexRoute
+  '/bot-handlers/': typeof AuthenticatedBotHandlersIndexRoute
+  '/broadcast/': typeof AuthenticatedBroadcastIndexRoute
+  '/chats/': typeof AuthenticatedChatsIndexRoute
+  '/contacts/': typeof AuthenticatedContactsIndexRoute
+  '/interactive-message/': typeof AuthenticatedInteractiveMessageIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/dashboard/agent/$agentId': typeof AuthenticatedDashboardAgentAgentIdRoute
   '/dashboard/agents/$agentId': typeof AuthenticatedDashboardAgentsAgentIdRoute
@@ -381,6 +381,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/clerk'
     | '/settings'
     | '/forgot-password'
@@ -395,7 +396,6 @@ export interface FileRouteTypes {
     | '/503'
     | '/analytics'
     | '/profile'
-    | '/'
     | '/dashboard/admin'
     | '/dashboard/agent'
     | '/settings/appearance'
@@ -408,12 +408,12 @@ export interface FileRouteTypes {
     | '/clerk/sign-in'
     | '/clerk/sign-up'
     | '/clerk/user-management'
-    | '/agents'
-    | '/bot-handlers'
-    | '/broadcast'
-    | '/chats'
-    | '/contacts'
-    | '/interactive-message'
+    | '/agents/'
+    | '/bot-handlers/'
+    | '/broadcast/'
+    | '/chats/'
+    | '/contacts/'
+    | '/interactive-message/'
     | '/settings/'
     | '/dashboard/agent/$agentId'
     | '/dashboard/agents/$agentId'
@@ -524,7 +524,7 @@ declare module '@tanstack/react-router' {
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -650,42 +650,42 @@ declare module '@tanstack/react-router' {
     '/_authenticated/interactive-message/': {
       id: '/_authenticated/interactive-message/'
       path: '/interactive-message'
-      fullPath: '/interactive-message'
+      fullPath: '/interactive-message/'
       preLoaderRoute: typeof AuthenticatedInteractiveMessageIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/contacts/': {
       id: '/_authenticated/contacts/'
       path: '/contacts'
-      fullPath: '/contacts'
+      fullPath: '/contacts/'
       preLoaderRoute: typeof AuthenticatedContactsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/chats/': {
       id: '/_authenticated/chats/'
       path: '/chats'
-      fullPath: '/chats'
+      fullPath: '/chats/'
       preLoaderRoute: typeof AuthenticatedChatsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/broadcast/': {
       id: '/_authenticated/broadcast/'
       path: '/broadcast'
-      fullPath: '/broadcast'
+      fullPath: '/broadcast/'
       preLoaderRoute: typeof AuthenticatedBroadcastIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/bot-handlers/': {
       id: '/_authenticated/bot-handlers/'
       path: '/bot-handlers'
-      fullPath: '/bot-handlers'
+      fullPath: '/bot-handlers/'
       preLoaderRoute: typeof AuthenticatedBotHandlersIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/agents/': {
       id: '/_authenticated/agents/'
       path: '/agents'
-      fullPath: '/agents'
+      fullPath: '/agents/'
       preLoaderRoute: typeof AuthenticatedAgentsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }

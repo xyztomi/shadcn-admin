@@ -20,7 +20,7 @@ export default defineConfig({
     },
   },
   server: {
-    allowedHosts: ['join-under-incorporate-notes.trycloudflare.com'],
+    allowedHosts: ['quest-kirk-understand-policies.trycloudflare.com'],
     proxy: {
       '/api': {
         target: 'http://localhost:8000',

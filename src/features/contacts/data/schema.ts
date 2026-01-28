@@ -8,6 +8,7 @@ export const boothTagSchema = z.enum([
   'kyzn_kuningan',
   'mr_padel_cipete',
   'other',
+  'all',
 ])
 export type BoothTag = z.infer<typeof boothTagSchema>
 

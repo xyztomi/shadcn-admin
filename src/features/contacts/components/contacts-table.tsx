@@ -111,7 +111,7 @@ export function ContactsTable({ data, isLoading }: ContactsTableProps) {
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
                   className={cn(
-                    row.original.unread_count > 0 && 'bg-muted/50'
+                    (row.original.unread_count ?? 0) > 0 && 'bg-muted/50'
                   )}
                 >
                   {row.getVisibleCells().map((cell) => (

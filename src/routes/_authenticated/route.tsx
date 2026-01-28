@@ -4,7 +4,7 @@ import { api } from '@/api/client'
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
 
 export const Route = createFileRoute('/_authenticated')({
-  beforeLoad: async ({ location }): Promise<{ user: AuthUser }> => {
+  beforeLoad: async (): Promise<{ user: AuthUser }> => {
     const { auth } = useAuthStore.getState()
 
     // If no token, redirect to sign-in

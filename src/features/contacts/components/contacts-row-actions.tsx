@@ -24,7 +24,7 @@ export function ContactsRowActions({ row }: ContactsRowActionsProps) {
   const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'superuser'
 
   const handleOpenChat = () => {
-    navigate({ to: '/chats', search: { wa_id: row.original.wa_id } })
+    navigate({ to: '/chats', search: { contact: row.original.wa_id } })
   }
 
   const handleEdit = () => {
